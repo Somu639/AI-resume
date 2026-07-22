@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { env } from "../config/env";
+import { env, envWarnings } from "../config/env";
 
 export const healthRouter = Router();
 
@@ -8,6 +8,7 @@ healthRouter.get("/", (_req, res) => {
     status: "ok",
     service: "resumeai-api",
     env: env.NODE_ENV,
+    warnings: envWarnings.length ? envWarnings : undefined,
     timestamp: new Date().toISOString(),
   });
 });

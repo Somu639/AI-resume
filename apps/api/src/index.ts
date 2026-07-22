@@ -86,22 +86,26 @@ if (env.SENTRY_DSN) {
 
 app.use(errorHandler);
 
-const server = app.listen(env.PORT, () => {
-  logger.info(
-    { port: env.PORT, env: env.NODE_ENV },
-    `ResumeAI API listening on http://localhost:${env.PORT}`
-  );
-});
-
-function shutdown(signal: string) {
-  logger.info({ signal }, "Shutting down gracefully");
-  server.close(() => {
-    process.exit(0);
+// On Vercel, the platform invokes `app` as a serverless handler — do not listen.
+if (!process.env.VERCEL) {
+  const server = app.listen(env.PORT, () => {
+    logger.info(
+      { port: env.PORT, env: env.NODE_ENV },
+      `ResumeAI API listening on http://localhost:${env.PORT}`
+    );
   });
-  setTimeout(() => process.exit(1), 10_000).unref();
+
+  function shutdown(signal: string) {
+    logger.info({ signal }, "Shutting down gracefully");
+    server.close(() => {
+      process.exit(0);
+    });
+    setTimeout(() => process.exit(1), 10_000).unref();
+  }
+
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
 }
 
-process.on("SIGTERM", () => shutdown("SIGTERM"));
-process.on("SIGINT", () => shutdown("SIGINT"));
-
+export default app;
 export { app };

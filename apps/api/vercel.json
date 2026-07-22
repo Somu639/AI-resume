@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "express",
+  "installCommand": "cd ../.. && npm install && npm run db:generate -w @resumeai/api",
+  "buildCommand": "cd ../.. && npm run build -w @resumeai/api"
+}

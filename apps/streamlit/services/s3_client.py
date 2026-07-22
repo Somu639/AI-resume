@@ -7,6 +7,8 @@ from typing import Any, Dict, List, Tuple
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 
+from services import env_bootstrap  # noqa: F401
+
 
 def _client():
     return boto3.client(
@@ -18,19 +20,34 @@ def _client():
     )
 
 
-def check_s3() -> Tuple[bool, str]:
-    bucket = os.getenv("S3_BUCKET", "")
+def check_s3() -> Tuple[bool, str, bool]:
+    """
+    Returns (ok, message, optional).
+    When S3 is not configured locally, optional=True so the console shows Skipped.
+    """
+    bucket = os.getenv("S3_BUCKET", "").strip()
     if not bucket:
-        return False, "S3_BUCKET not set"
+        return False, "S3 not configured (optional for local)", True
+
+    has_keys = bool(os.getenv("AWS_ACCESS_KEY_ID")) and bool(
+        os.getenv("AWS_SECRET_ACCESS_KEY")
+    )
+    if not has_keys and not os.getenv("S3_ENDPOINT"):
+        return (
+            False,
+            "S3_BUCKET set but AWS credentials / S3_ENDPOINT missing",
+            True,
+        )
+
     try:
         _client().head_bucket(Bucket=bucket)
-        return True, f"bucket {bucket} reachable"
+        return True, f"bucket {bucket} reachable", False
     except (BotoCoreError, ClientError) as exc:
-        return False, str(exc)
+        return False, str(exc), False
 
 
 def list_recent_objects(limit: int = 10) -> List[Dict[str, Any]]:
-    bucket = os.getenv("S3_BUCKET", "")
+    bucket = os.getenv("S3_BUCKET", "").strip()
     if not bucket:
         return []
 

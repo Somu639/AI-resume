@@ -2,20 +2,26 @@ import type { NextConfig } from "next";
 
 /**
  * Proxy /api/v1 → Express API so the browser always hits the same origin.
- * Avoids 404s when another local app (e.g. JobPilot) already owns :4000.
+ * Local default: :4002. On Vercel, set API_PROXY_TARGET to the API deployment URL
+ * (or set NEXT_PUBLIC_API_URL to call the API host directly).
  */
 const API_PROXY_TARGET =
   process.env.API_PROXY_TARGET ?? "http://localhost:4002";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  output: "standalone",
+  // `standalone` is for Docker; Vercel uses its own Next.js output.
+  ...(process.env.VERCEL ? {} : { output: "standalone" as const }),
   poweredByHeader: false,
   transpilePackages: ["@resumeai/shared", "@resumeai/resume-export"],
   images: {
     remotePatterns: [],
   },
   async rewrites() {
+    // When the browser already uses an absolute NEXT_PUBLIC_API_URL, rewrites are unused.
+    if (process.env.NEXT_PUBLIC_API_URL?.startsWith("http")) {
+      return [];
+    }
     return [
       {
         source: "/api/v1/:path*",

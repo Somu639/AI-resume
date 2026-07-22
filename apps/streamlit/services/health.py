@@ -5,9 +5,14 @@ from typing import Any
 
 import requests
 
+from services import env_bootstrap  # noqa: F401
+
+# Matches local apps/api PORT=4002 (Docker Compose overrides API_BASE_URL)
+DEFAULT_API_BASE = "http://localhost:4002/api/v1"
+
 
 def api_base() -> str:
-    return os.getenv("API_BASE_URL", "http://localhost:4000/api/v1").rstrip("/")
+    return os.getenv("API_BASE_URL", DEFAULT_API_BASE).rstrip("/")
 
 
 def api_headers() -> dict[str, str]:
@@ -36,11 +41,24 @@ def system_status() -> dict[str, Any]:
     from services.s3_client import check_s3
 
     db_ok, db_msg = ping_database()
-    s3_ok, s3_msg = check_s3()
+    s3_ok, s3_msg, s3_optional = check_s3()
     api = check_api()
+
+    if s3_optional and not s3_ok:
+        storage = {"ok": True, "label": "Skipped", "detail": s3_msg}
+    else:
+        storage = {
+            "ok": s3_ok,
+            "label": "Ready" if s3_ok else "Error",
+            "detail": s3_msg,
+        }
 
     return {
         "api": api,
-        "database": {"ok": db_ok, "label": "Connected" if db_ok else "Error", "detail": db_msg},
-        "storage": {"ok": s3_ok, "label": "Ready" if s3_ok else "Error", "detail": s3_msg},
+        "database": {
+            "ok": db_ok,
+            "label": "Connected" if db_ok else "Error",
+            "detail": db_msg,
+        },
+        "storage": storage,
     }

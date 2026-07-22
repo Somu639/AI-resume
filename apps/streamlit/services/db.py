@@ -5,6 +5,8 @@ from typing import Tuple
 
 import psycopg2
 
+from services import env_bootstrap  # noqa: F401
+
 
 def ping_database() -> Tuple[bool, str]:
     url = os.getenv("DATABASE_URL", "")

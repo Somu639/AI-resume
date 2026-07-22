@@ -1,18 +1,22 @@
 from __future__ import annotations
 
 import json
-import os
+import sys
+from pathlib import Path
 
 import requests
 import streamlit as st
 
+# Multipage scripts may not have apps/streamlit on sys.path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from services.health import api_base, api_headers  # noqa: E402
+
 st.set_page_config(page_title="JD Analyze · ResumeAI", layout="wide")
 st.title("Job description analysis")
 
-api = os.getenv("API_BASE_URL", "http://localhost:4000/api/v1").rstrip("/")
-headers = {"Content-Type": "application/json"}
-if os.getenv("API_KEY"):
-    headers["X-API-Key"] = os.getenv("API_KEY", "")
+api = api_base()
+headers = api_headers()
 
 jd = st.text_area("Paste job description", height=240)
 

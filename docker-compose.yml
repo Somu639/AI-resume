@@ -41,11 +41,14 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     env_file:
-      - apps/streamlit/.env
+      - path: apps/streamlit/.env
+        required: false
     environment:
       APP_ENV: production
       API_BASE_URL: http://api:4000/api/v1
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/resumeai
+      # S3 optional locally; set via .env or MinIO profile when needed
+      S3_BUCKET: ${S3_BUCKET:-}
     ports:
       - "8501:8501"
     depends_on:

@@ -1,6 +1,5 @@
 {
-  "buildCommand": "cd ../.. && npm install && npm run build -w @resumeai/web",
+  "buildCommand": "cd ../.. && npm install && npm run db:generate -w @resumeai/api && npm run build -w @resumeai/web",
   "installCommand": "cd ../.. && npm install",
-  "framework": "nextjs",
-  "outputDirectory": ".next"
+  "framework": "nextjs"
 }

@@ -67,6 +67,7 @@ if (!parsed.success) {
 export const env = {
   ...parsed.data,
   isProd: parsed.data.NODE_ENV === "production",
+  isVercel: Boolean(process.env.VERCEL),
   require(name: keyof typeof parsed.data, fallback?: string): string {
     const value = String(parsed.data[name] ?? fallback ?? "");
     if (!value) throw new Error(`Missing required env var: ${name}`);
@@ -74,11 +75,19 @@ export const env = {
   },
 };
 
+/** Soft checks — never crash the whole serverless process at import time. */
+export const envWarnings: string[] = [];
+
 if (env.isProd) {
   if (env.JWT_ACCESS_SECRET.includes("dev-") || env.JWT_ACCESS_SECRET.length < 32) {
-    throw new Error("JWT_ACCESS_SECRET must be a strong secret in production");
+    envWarnings.push(
+      "JWT_ACCESS_SECRET is weak or missing — set a ≥32 char secret in Vercel env"
+    );
   }
   if (!env.DATABASE_URL) {
-    throw new Error("DATABASE_URL is required in production");
+    envWarnings.push("DATABASE_URL is not set — database routes will fail");
+  }
+  if (envWarnings.length) {
+    console.warn("[resumeai-api] production env warnings:", envWarnings.join("; "));
   }
 }

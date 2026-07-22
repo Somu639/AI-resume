@@ -1,9 +1,4 @@
 import { z } from "zod";
-import {
-  generateResumeDocx,
-  generateResumePdf,
-  type ResumeThemeId,
-} from "@resumeai/resume-export";
 import { resumeJsonSchema } from "../engines/resume-optimization/schema";
 import { AppError } from "../middleware/errorHandler";
 
@@ -28,10 +23,15 @@ export const exportService = {
       );
     }
 
+    // Lazy-load so API cold start / health doesn't pull ESM-only @react-pdf/renderer
+    const { generateResumeDocx, generateResumePdf } = await import(
+      "@resumeai/resume-export"
+    );
+
     const { resume, theme, format, fileName } = parsed.data;
     const options = {
       resume,
-      theme: theme as ResumeThemeId,
+      theme,
       fileName,
     };
 

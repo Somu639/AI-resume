@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd ../.. && npm run build -w @resumeai/shared && npm run build -w @resumeai/resume-export && npm run build -w @resumeai/web",
+  "buildCommand": "cd ../.. && npm run build -w @resumeai/shared && npm run build -w @resumeai/web",
   "installCommand": "cd ../.. && npm install",
   "framework": "nextjs"
 }

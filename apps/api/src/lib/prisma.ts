@@ -22,4 +22,4 @@ if (process.env.NODE_ENV !== "production") {
 prisma
   .$connect()
   .then(() => logger.debug("Prisma connected"))
-  .catch((err) => logger.warn({ err }, "Prisma connect deferred"));
+  .catch((err: unknown) => logger.warn({ err }, "Prisma connect deferred"));

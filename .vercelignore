@@ -1,0 +1,12 @@
+# Never upload secrets to Vercel
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+.vercel
+**/__pycache__/
+**/.next/
+**/node_modules/
+apps/streamlit/.venv/

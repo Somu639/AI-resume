@@ -2,14 +2,16 @@ import path from "path";
 import dotenv from "dotenv";
 import { z } from "zod";
 
-// Try multiple locations — tsx may run with cwd at repo root or apps/api
-for (const candidate of [
-  path.resolve(__dirname, "../../.env"),
-  path.resolve(process.cwd(), ".env"),
-  path.resolve(process.cwd(), "apps/api/.env"),
-]) {
-  const result = dotenv.config({ path: candidate });
-  if (!result.error) break;
+// Load local .env only outside Vercel (never ship localhost DB credentials to prod)
+if (!process.env.VERCEL) {
+  for (const candidate of [
+    path.resolve(__dirname, "../../.env"),
+    path.resolve(process.cwd(), ".env"),
+    path.resolve(process.cwd(), "apps/api/.env"),
+  ]) {
+    const result = dotenv.config({ path: candidate });
+    if (!result.error) break;
+  }
 }
 
 const envSchema = z.object({

@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { logger } from "../lib/logger";
 
 /**
  * Shared Prisma client — one instance per process to avoid connection storms.
@@ -19,7 +18,7 @@ if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
 
-prisma
-  .$connect()
-  .then(() => logger.debug("Prisma connected"))
-  .catch((err: unknown) => logger.warn({ err }, "Prisma connect deferred"));
+// Do not connect at import time — Vercel cold starts must not hang on a bad DATABASE_URL
+export async function ensureDb() {
+  await prisma.$connect();
+}

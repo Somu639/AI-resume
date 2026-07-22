@@ -37,6 +37,20 @@ export function errorHandler(
     Sentry.captureException(err);
   }
 
+  // Surface DB connectivity issues clearly (common misconfig on Vercel)
+  const msg = err instanceof Error ? err.message : String(err);
+  if (
+    msg.includes("Can't reach database server") ||
+    msg.includes("P1001") ||
+    msg.includes("PrismaClientInitializationError")
+  ) {
+    return res.status(503).json({
+      message:
+        "Database unavailable. Set DATABASE_URL on the API to a hosted Postgres (not localhost).",
+      code: "DATABASE_UNAVAILABLE",
+    });
+  }
+
   return res.status(500).json({
     message: env.isProd ? "Internal server error" : String(err),
   });

@@ -1,5 +1,3 @@
-import mammoth from "mammoth";
-import { PDFParse } from "pdf-parse";
 import { z } from "zod";
 import { AppError } from "../../middleware/errorHandler";
 
@@ -274,7 +272,8 @@ export async function extractTextFromBuffer(
   mimeType: string
 ): Promise<string> {
   if (mimeType === "application/pdf") {
-    // pdf-parse v2 uses PDFParse class (v1 callable API removed)
+    // Lazy-load pdf-parse (DOMMatrix/canvas — crashes Vercel if imported at cold start)
+    const { PDFParse } = await import("pdf-parse");
     const parser = new PDFParse({ data: buffer });
     try {
       const result = await parser.getText();
@@ -288,6 +287,7 @@ export async function extractTextFromBuffer(
     mimeType ===
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
   ) {
+    const mammoth = await import("mammoth");
     const result = await mammoth.extractRawText({ buffer });
     return (result.value || "").trim();
   }

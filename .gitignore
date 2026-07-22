@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Env (never commit secrets)
+.env
+.env.*
+!.env.example
+!**/.env.example
+.env.local
+.env.*.local
+apps/api/.env
+apps/web/.env.local
+apps/streamlit/.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Uploads / temp
+apps/api/uploads/*
+!apps/api/uploads/.gitkeep
+
+# Prisma
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+*.pem
+.turbo/

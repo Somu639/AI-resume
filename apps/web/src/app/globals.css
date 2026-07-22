@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 20% 98%;
+    --foreground: 210 24% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 24% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 24% 10%;
+    --primary: 173 58% 32%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 14% 94%;
+    --secondary-foreground: 210 24% 16%;
+    --muted: 40 12% 94%;
+    --muted-foreground: 210 10% 42%;
+    --accent: 173 40% 94%;
+    --accent-foreground: 173 60% 22%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 40 12% 88%;
+    --input: 40 12% 88%;
+    --ring: 173 58% 32%;
+    --success: 152 55% 36%;
+    --warning: 38 92% 45%;
+    --chart-1: 173 58% 32%;
+    --chart-2: 199 70% 42%;
+    --chart-3: 38 80% 48%;
+    --chart-4: 210 16% 55%;
+    --chart-5: 152 45% 40%;
+    --radius: 0.75rem;
+    --sidebar: 40 16% 96%;
+    --sidebar-foreground: 210 24% 16%;
+    --hero-mesh: 173 40% 92%;
+  }
+
+  .dark {
+    --background: 210 20% 6%;
+    --foreground: 40 12% 96%;
+    --card: 210 18% 9%;
+    --card-foreground: 40 12% 96%;
+    --popover: 210 18% 9%;
+    --popover-foreground: 40 12% 96%;
+    --primary: 173 55% 45%;
+    --primary-foreground: 210 24% 6%;
+    --secondary: 210 14% 14%;
+    --secondary-foreground: 40 12% 92%;
+    --muted: 210 14% 14%;
+    --muted-foreground: 210 8% 62%;
+    --accent: 173 30% 14%;
+    --accent-foreground: 173 50% 72%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 12% 16%;
+    --input: 210 12% 16%;
+    --ring: 173 55% 45%;
+    --success: 152 50% 42%;
+    --warning: 38 85% 50%;
+    --chart-1: 173 55% 45%;
+    --chart-2: 199 65% 52%;
+    --chart-3: 38 80% 55%;
+    --chart-4: 210 12% 50%;
+    --chart-5: 152 45% 48%;
+    --sidebar: 210 18% 7%;
+    --sidebar-foreground: 40 12% 92%;
+    --hero-mesh: 173 25% 12%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body), system-ui, sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .surface-grid {
+    background-image:
+      linear-gradient(to right, hsl(var(--border) / 0.5) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.5) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .mesh-bg {
+    background:
+      radial-gradient(ellipse 70% 50% at 70% 10%, hsl(var(--hero-mesh)), transparent 55%),
+      radial-gradient(ellipse 50% 40% at 10% 80%, hsl(var(--primary) / 0.08), transparent 50%),
+      hsl(var(--background));
+  }
+}
+
+/* TipTap editor surface */
+.ProseMirror {
+  min-height: 420px;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: hsl(var(--muted-foreground));
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
+
+.ProseMirror h1 {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.ProseMirror h2 {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.4rem;
+}
+
+.ProseMirror p {
+  margin: 0.35rem 0;
+  line-height: 1.55;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.25rem;
+  margin: 0.4rem 0;
+}
+
+.ProseMirror li {
+  margin: 0.2rem 0;
+}

@@ -1,0 +1,26 @@
+{
+  "name": "resumeai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-powered resume optimization SaaS platform",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:web": "npm run dev -w @resumeai/web",
+    "dev:api": "npm run dev -w @resumeai/api",
+    "dev:streamlit": "cd apps/streamlit && streamlit run app.py",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "db:generate": "npm run db:generate -w @resumeai/api",
+    "db:migrate": "npm run db:migrate -w @resumeai/api",
+    "db:studio": "npm run db:studio -w @resumeai/api",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

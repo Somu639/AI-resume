@@ -1,0 +1,227 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuthProvider {
+  email
+  google
+}
+
+enum ResumeStatus {
+  processing
+  ready
+  failed
+}
+
+enum VersionSource {
+  upload
+  ai_optimize
+  manual
+}
+
+enum OptimizeStatus {
+  pending
+  completed
+  failed
+}
+
+enum PlanTier {
+  free
+  pro
+  business
+}
+
+enum SubscriptionStatus {
+  inactive
+  trialing
+  active
+  past_due
+  canceled
+}
+
+model User {
+  id               String       @id @default(cuid())
+  email            String       @unique
+  passwordHash     String?
+  name             String?
+  avatarUrl        String?
+  googleId         String?      @unique
+  provider         AuthProvider @default(email)
+  /// Stripe customer id for billing
+  stripeCustomerId String?      @unique
+  plan             PlanTier     @default(free)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  resumes          Resume[]
+  jobDescriptions  JobDescription[]
+  analyses         Analysis[]
+  optimizedResumes OptimizedResume[]
+  coverLetters     CoverLetter[]
+  subscription     Subscription?
+  usageEvents      UsageEvent[]
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  stripeSubscriptionId String?            @unique
+  stripePriceId        String?
+  status               SubscriptionStatus @default(inactive)
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UsageEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  metaJson  Json?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type, createdAt])
+}
+
+model Resume {
+  id               String       @id @default(cuid())
+  userId           String
+  title            String
+  originalFileName String
+  mimeType         String
+  s3Key            String
+  extractedText    String?
+  /// Structured parse result (personalInfo, skills, experience, …)
+  parsedJson       Json?
+  status           ResumeStatus @default(processing)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  deletedAt        DateTime?
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions         ResumeVersion[]
+  analyses         Analysis[]
+  optimizedResumes OptimizedResume[]
+  coverLetters     CoverLetter[]
+
+  @@index([userId, createdAt])
+}
+
+model ResumeVersion {
+  id              String        @id @default(cuid())
+  resumeId        String
+  parentVersionId String?
+  versionNumber   Int
+  label           String?
+  contentText     String
+  contentJson     Json?
+  s3KeyPdf        String?
+  s3KeyDocx       String?
+  changesJson     Json?
+  source          VersionSource @default(upload)
+  createdAt       DateTime      @default(now())
+
+  resume           Resume            @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  parentVersion    ResumeVersion?    @relation("VersionLineage", fields: [parentVersionId], references: [id])
+  childVersions    ResumeVersion[]   @relation("VersionLineage")
+  analyses         Analysis[]
+  optimizedResumes OptimizedResume[]
+
+  @@unique([resumeId, versionNumber])
+  @@index([resumeId])
+}
+
+model JobDescription {
+  id             String   @id @default(cuid())
+  userId         String
+  title          String
+  company        String?
+  rawText        String
+  sourceFileName String?
+  s3Key          String?
+  keywordsJson   Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analyses         Analysis[]
+  optimizedResumes OptimizedResume[]
+  coverLetters     CoverLetter[]
+
+  @@index([userId, createdAt])
+}
+
+model Analysis {
+  id                          String   @id @default(cuid())
+  userId                      String
+  resumeId                    String
+  jobDescriptionId            String
+  resumeVersionId             String?
+  atsScore                    Int
+  keywordMatchPercent         Int
+  formattingScore             Int
+  matchedKeywordsJson         Json
+  missingSkillsJson           Json
+  missingResponsibilitiesJson Json
+  detailsJson                 Json?
+  summary                     String?
+  createdAt                   DateTime @default(now())
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resume          Resume           @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  jobDescription  JobDescription   @relation(fields: [jobDescriptionId], references: [id], onDelete: Cascade)
+  resumeVersion   ResumeVersion?   @relation(fields: [resumeVersionId], references: [id])
+  optimizedResume OptimizedResume?
+
+  @@index([userId, createdAt])
+}
+
+model OptimizedResume {
+  id               String         @id @default(cuid())
+  userId           String
+  analysisId       String         @unique
+  resumeId         String
+  jobDescriptionId String
+  resumeVersionId  String
+  status           OptimizeStatus @default(pending)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysis       Analysis       @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  resume         Resume         @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  jobDescription JobDescription @relation(fields: [jobDescriptionId], references: [id], onDelete: Cascade)
+  resumeVersion  ResumeVersion  @relation(fields: [resumeVersionId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model CoverLetter {
+  id               String   @id @default(cuid())
+  userId           String
+  resumeId         String
+  jobDescriptionId String
+  content          String
+  greeting         String?
+  closing          String?
+  s3KeyPdf         String?
+  s3KeyDocx        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resume         Resume         @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  jobDescription JobDescription @relation(fields: [jobDescriptionId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}

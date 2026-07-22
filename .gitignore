@@ -54,4 +54,9 @@ coverage/
 **/__pycache__/
 *.pyc
 apps/api/.env.local
+packages/*/dist/
 
+
+
+.vercel
+.env*

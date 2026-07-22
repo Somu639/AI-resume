@@ -42,13 +42,26 @@ export function errorHandler(
   if (
     msg.includes("Can't reach database server") ||
     msg.includes("P1001") ||
+    msg.includes("ENOTFOUND") ||
+    msg.includes("ENOIDENTIFIER") ||
     msg.includes("PrismaClientInitializationError")
   ) {
     return res.status(503).json({
       message:
-        "Database unavailable. Set DATABASE_URL on the API to a hosted Postgres (not localhost).",
+        "Database unavailable. In Vercel → ai-resume-api → Settings → Environment Variables, set DATABASE_URL to your Supabase pooler URI (Transaction mode), then redeploy.",
       code: "DATABASE_UNAVAILABLE",
     });
+  }
+
+  // body-parser JSON errors
+  if (
+    err instanceof SyntaxError ||
+    (typeof err === "object" &&
+      err !== null &&
+      "statusCode" in err &&
+      (err as { statusCode?: number }).statusCode === 400)
+  ) {
+    return res.status(400).json({ message: "Invalid JSON body", code: "BAD_JSON" });
   }
 
   return res.status(500).json({

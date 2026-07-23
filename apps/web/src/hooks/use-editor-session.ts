@@ -94,14 +94,14 @@ export function useEditorSession() {
 
       if (!resumeId) {
         setStatus(
-          "error",
+          "needs_input",
           "Upload a resume first, then analyze a job description."
         );
         return;
       }
       if (!job) {
         setStatus(
-          "error",
+          "needs_input",
           "Analyze a job description first so edits match that JD."
         );
         return;

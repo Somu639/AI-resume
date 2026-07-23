@@ -38,7 +38,7 @@ type EditorStore = {
   originalResume: ResumeJsonLike | null;
   optimizedResume: ResumeJsonLike | null;
   atsSnapshot: AtsSnapshot | null;
-  status: "idle" | "loading" | "ready" | "error";
+  status: "idle" | "loading" | "ready" | "error" | "needs_input";
   isReoptimizing: boolean;
   error: string | null;
   setWorkingHtml: (html: string, recordHistory?: boolean) => void;

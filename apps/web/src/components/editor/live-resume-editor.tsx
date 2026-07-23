@@ -38,6 +38,35 @@ export function LiveResumeEditor() {
     );
   }
 
+  if (status === "needs_input") {
+    const needsJd = Boolean(error && error.toLowerCase().includes("job description first"));
+    return (
+      <div className="mx-auto max-w-lg space-y-4 rounded-xl border border-border bg-card p-8 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+          <Sparkles className="h-6 w-6 text-primary" />
+        </div>
+        <p className="font-medium">Let’s set up your optimization</p>
+        <p className="text-sm text-muted-foreground">
+          {error ?? "Upload a resume and analyze a job description to get started."}
+        </p>
+        <div className="flex flex-wrap justify-center gap-2">
+          {needsJd ? (
+            <Button asChild>
+              <Link href="/analyze">Analyze JD</Link>
+            </Button>
+          ) : (
+            <Button asChild>
+              <Link href="/upload">Upload resume</Link>
+            </Button>
+          )}
+          <Button asChild variant="outline">
+            <Link href="/resumes">My resumes</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (status === "error") {
     return (
       <div className="mx-auto max-w-lg space-y-4 rounded-xl border border-border bg-card p-8 text-center">

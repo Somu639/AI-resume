@@ -119,9 +119,15 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <View style={styles.section} wrap={false}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <View style={styles.rule} />
+    // Section flows across pages so we never leave a large blank gap when
+    // a section doesn't fit in the remaining space on the current page.
+    <View style={styles.section}>
+      {/* Keep the title + rule together, and don't strand a heading at the
+          very bottom of a page (reserve space ahead of it). */}
+      <View wrap={false} minPresenceAhead={48}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        <View style={styles.rule} />
+      </View>
       {children}
     </View>
   );
@@ -181,7 +187,7 @@ export function ResumePdfDocument({ resume, themeId = "classic" }: Props) {
         {experience.length ? (
           <Section title="Experience" styles={styles}>
             {experience.map((job, idx) => (
-              <View key={`${job.company}-${idx}`} style={styles.block}>
+              <View key={`${job.company}-${idx}`} style={styles.block} wrap={false}>
                 <View style={styles.row}>
                   <Text style={styles.roleTitle}>{job.title}</Text>
                   <Text style={styles.dates}>
@@ -200,7 +206,7 @@ export function ResumePdfDocument({ resume, themeId = "classic" }: Props) {
         {projects.length ? (
           <Section title="Projects" styles={styles}>
             {projects.map((project, idx) => (
-              <View key={`${project.name}-${idx}`} style={styles.block}>
+              <View key={`${project.name}-${idx}`} style={styles.block} wrap={false}>
                 <Text style={styles.roleTitle}>{project.name}</Text>
                 {project.description ? (
                   <Text style={styles.paragraph}>{project.description}</Text>
@@ -219,7 +225,7 @@ export function ResumePdfDocument({ resume, themeId = "classic" }: Props) {
         {education.length ? (
           <Section title="Education" styles={styles}>
             {education.map((edu, idx) => (
-              <View key={`${edu.institution}-${idx}`} style={styles.block}>
+              <View key={`${edu.institution}-${idx}`} style={styles.block} wrap={false}>
                 <View style={styles.row}>
                   <Text style={styles.roleTitle}>{educationHeadline(edu)}</Text>
                   <Text style={styles.dates}>
@@ -235,7 +241,7 @@ export function ResumePdfDocument({ resume, themeId = "classic" }: Props) {
         {certifications.length ? (
           <Section title="Certifications" styles={styles}>
             {certifications.map((cert, idx) => (
-              <View key={`${cert.name}-${idx}`} style={styles.block}>
+              <View key={`${cert.name}-${idx}`} style={styles.block} wrap={false}>
                 <Text style={styles.roleTitle}>
                   {[cert.name, cert.issuer].filter(Boolean).join(" — ")}
                 </Text>

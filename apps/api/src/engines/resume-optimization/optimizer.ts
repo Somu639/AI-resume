@@ -27,8 +27,25 @@ import { resumeJsonToText } from "./serialize";
 // single pass, so we stop as soon as we're above 95 instead of creeping up a
 // few points per LLM pass.
 const TARGET_ATS_SCORE = 96;
-/** Fallback LLM refine passes if the first strong pass still lands ≤ 95. */
-const MAX_REFINE_PASSES = 3;
+/**
+ * At most ONE fallback LLM refine pass. Keeping this low conserves the daily
+ * token budget (free Groq tier) — the deterministic booster does the heavy
+ * lifting, so extra LLM passes rarely help but always cost tokens.
+ */
+const MAX_REFINE_PASSES = 1;
+
+/** Detect provider rate-limit / daily-quota errors so we can degrade gracefully. */
+function isRateLimitError(error: unknown): boolean {
+  const message =
+    error instanceof AppError
+      ? error.message
+      : error instanceof Error
+        ? error.message
+        : String(error);
+  return /\b429\b|rate[\s-]?limit|tokens? per day|\bTPD\b|quota|too many requests/i.test(
+    message
+  );
+}
 
 function parseModelJson(content: string, label: string): unknown {
   const trimmed = content.trim();
@@ -168,9 +185,80 @@ async function callOptimizeModel(
 }
 
 /**
+ * Zero-token optimization used when the LLM is unavailable / rate-limited.
+ * Runs only the deterministic evidenced-keyword booster (never invents content)
+ * so users still get an ATS-optimized resume instead of a hard error.
+ */
+function buildDeterministicOptimization(
+  resume: ResumeJson,
+  job: OptimizeResumeRequest["jobDescription"],
+  beforeScore: ReturnType<typeof scoreResumeAgainstJob>
+): OptimizeResumeResult {
+  const boosted = boostResumeForAts(resume, job);
+  const working = boosted.resume;
+  const afterScore = scoreResumeAgainstJob(working, job);
+
+  const modifications: ResumeModification[] = [];
+  if (boosted.promotedKeywords.length) {
+    modifications.push({
+      type: "added",
+      section: "skills",
+      after: boosted.promotedKeywords.join(", "),
+      reason:
+        "Promoted JD keywords already evidenced in the resume (offline ATS boost — AI writer was temporarily rate-limited)",
+    });
+  }
+
+  const topSkills = dedupeStrings([...job.requiredSkills, ...job.tools]).slice(
+    0,
+    6
+  );
+  const coverLetter: CoverLetter = {
+    greeting: "Dear Hiring Manager,",
+    body: `I am excited to apply for this ${
+      job.seniority || "role"
+    }. My background aligns with your key requirements${
+      topSkills.length ? `, including ${topSkills.join(", ")}` : ""
+    }, and my experience reflects the skills and impact described in the job posting. I would welcome the opportunity to contribute to your team.`,
+    closing: `Sincerely,\n${resume.personalInfo.name}`,
+  };
+
+  const result: OptimizeResumeResult = {
+    optimizedResume: working,
+    modifications,
+    atsAnalysis: {
+      summary: `Resume optimized with the deterministic ATS booster (the AI writer is temporarily rate-limited). Optimized ATS score: ${afterScore.atsScore}/100 against this JD.`,
+      strengths: afterScore.strengths,
+      weaknesses: afterScore.weakSections.map(
+        (section) => `Strengthen ${section} alignment with the JD.`
+      ),
+      keywordMatchEstimate: afterScore.atsScore,
+      recommendations: afterScore.suggestions,
+    },
+    missingKeywords: afterScore.missingKeywords,
+    coverLetter,
+    atsImprovementScore: Number(
+      (afterScore.atsScore - beforeScore.atsScore).toFixed(1)
+    ),
+    beforeAtsScore: beforeScore.atsScore,
+    afterAtsScore: afterScore.atsScore,
+  };
+
+  const validated = optimizeResumeResultSchema.safeParse(result);
+  if (!validated.success) {
+    throw new AppError(
+      500,
+      "Optimization engine produced an invalid result payload"
+    );
+  }
+  return validated.data;
+}
+
+/**
  * AI resume optimization engine.
  * Iteratively targets ATS ≥ TARGET_ATS_SCORE via LLM refine passes +
  * deterministic evidenced-keyword booster, stopping once the score converges.
+ * Degrades to a zero-token deterministic boost if the LLM is rate-limited.
  */
 export async function optimizeResume(
   input: OptimizeResumeRequest
@@ -187,11 +275,20 @@ export async function optimizeResume(
   const beforeScore = scoreResumeAgainstJob(resume, jobDescription);
   const client = createLlmClient();
 
-  let modelOut = await callOptimizeModel(
-    client,
-    RESUME_OPTIMIZATION_SYSTEM_PROMPT,
-    buildResumeOptimizationUserPrompt(resume, jobDescription)
-  );
+  let modelOut: ModelOutput;
+  try {
+    modelOut = await callOptimizeModel(
+      client,
+      RESUME_OPTIMIZATION_SYSTEM_PROMPT,
+      buildResumeOptimizationUserPrompt(resume, jobDescription)
+    );
+  } catch (error) {
+    // Daily token / rate limit exhausted → still deliver an optimized resume.
+    if (isRateLimitError(error)) {
+      return buildDeterministicOptimization(resume, jobDescription, beforeScore);
+    }
+    throw error;
+  }
   assertIdentityPreserved(resume, modelOut.optimizedResume);
 
   let working = modelOut.optimizedResume;
@@ -225,19 +322,26 @@ export async function optimizeResume(
     pass += 1;
     const previousScore = afterScore.atsScore;
 
-    const refineOut = await callOptimizeModel(
-      client,
-      RESUME_OPTIMIZATION_SYSTEM_PROMPT,
-      buildAtsRefineUserPrompt(
-        working,
-        jobDescription,
-        afterScore.atsScore,
-        dedupeStrings([
-          ...missingKeywords,
-          ...afterScore.missingKeywords,
-        ]).slice(0, 40)
-      )
-    );
+    let refineOut: ModelOutput;
+    try {
+      refineOut = await callOptimizeModel(
+        client,
+        RESUME_OPTIMIZATION_SYSTEM_PROMPT,
+        buildAtsRefineUserPrompt(
+          working,
+          jobDescription,
+          afterScore.atsScore,
+          dedupeStrings([
+            ...missingKeywords,
+            ...afterScore.missingKeywords,
+          ]).slice(0, 40)
+        )
+      );
+    } catch (error) {
+      // Rate-limited mid-refine: keep the best result we already have.
+      if (isRateLimitError(error)) break;
+      throw error;
+    }
     assertIdentityPreserved(resume, refineOut.optimizedResume);
 
     const boosted = boostResumeForAts(refineOut.optimizedResume, jobDescription);

@@ -23,7 +23,9 @@ import {
 } from "./schema";
 import { resumeJsonToText } from "./serialize";
 
-const TARGET_ATS_SCORE = 95;
+const TARGET_ATS_SCORE = 99;
+/** Max LLM refine passes; the loop also stops early once the score converges. */
+const MAX_REFINE_PASSES = 4;
 
 function parseModelJson(content: string, label: string): unknown {
   const trimmed = content.trim();
@@ -164,7 +166,8 @@ async function callOptimizeModel(
 
 /**
  * AI resume optimization engine.
- * Targets ATS ≥ 95 via LLM pass(es) + deterministic evidenced-keyword booster.
+ * Iteratively targets ATS ≥ TARGET_ATS_SCORE via LLM refine passes +
+ * deterministic evidenced-keyword booster, stopping once the score converges.
  */
 export async function optimizeResume(
   input: OptimizeResumeRequest
@@ -210,7 +213,15 @@ export async function optimizeResume(
 
   let afterScore = scoreResumeAgainstJob(working, jobDescription);
 
-  if (afterScore.atsScore < TARGET_ATS_SCORE) {
+  // Iteratively refine (LLM) + boost (deterministic, evidenced-only) until we
+  // hit the target or the score stops improving. This lets the score climb as
+  // high as honest optimization allows instead of stopping at a fixed 95, while
+  // never inventing experience (guarded by assertIdentityPreserved + booster).
+  let pass = 0;
+  while (afterScore.atsScore < TARGET_ATS_SCORE && pass < MAX_REFINE_PASSES) {
+    pass += 1;
+    const previousScore = afterScore.atsScore;
+
     const refineOut = await callOptimizeModel(
       client,
       RESUME_OPTIMIZATION_SYSTEM_PROMPT,
@@ -226,11 +237,16 @@ export async function optimizeResume(
     );
     assertIdentityPreserved(resume, refineOut.optimizedResume);
 
-    const boosted = boostResumeForAts(
-      refineOut.optimizedResume,
-      jobDescription
-    );
-    working = boosted.resume;
+    const boosted = boostResumeForAts(refineOut.optimizedResume, jobDescription);
+    const candidate = boosted.resume;
+    const candidateScore = scoreResumeAgainstJob(candidate, jobDescription);
+
+    // Only accept a pass that does not regress the score.
+    if (candidateScore.atsScore < previousScore) {
+      break;
+    }
+
+    working = candidate;
     modifications = [
       ...modifications,
       ...refineOut.modifications,
@@ -240,7 +256,7 @@ export async function optimizeResume(
               type: "added" as const,
               section: "skills",
               after: boosted.promotedKeywords.join(", "),
-              reason: "Second-pass ATS keyword promotion (evidenced only)",
+              reason: `ATS keyword promotion pass ${pass} (evidenced only)`,
             },
           ]
         : []),
@@ -248,13 +264,12 @@ export async function optimizeResume(
     atsAnalysis = refineOut.atsAnalysis;
     missingKeywords = refineOut.missingKeywords;
     coverLetter = refineOut.coverLetter;
-    afterScore = scoreResumeAgainstJob(working, jobDescription);
-  }
+    afterScore = candidateScore;
 
-  if (afterScore.atsScore < TARGET_ATS_SCORE) {
-    const boosted = boostResumeForAts(working, jobDescription);
-    working = boosted.resume;
-    afterScore = scoreResumeAgainstJob(working, jobDescription);
+    // Converged — another LLM pass won't help without inventing experience.
+    if (afterScore.atsScore <= previousScore) {
+      break;
+    }
   }
 
   const mergedMissing = dedupeStrings([
@@ -284,15 +299,17 @@ export async function optimizeResume(
       strengths: dedupeStrings([
         ...atsAnalysis.strengths,
         ...(afterScore.atsScore >= TARGET_ATS_SCORE
-          ? ["Optimized resume meets the 95+ ATS target for this JD."]
-          : []),
+          ? [`Optimized resume meets the ${TARGET_ATS_SCORE}+ ATS target for this JD.`]
+          : afterScore.atsScore >= 90
+            ? [`Strong ATS alignment (${afterScore.atsScore}/100) for this JD.`]
+            : []),
       ]),
       weaknesses: dedupeStrings(atsAnalysis.weaknesses),
       recommendations,
       summary:
         afterScore.atsScore >= TARGET_ATS_SCORE
-          ? `${atsAnalysis.summary} Optimized ATS score: ${afterScore.atsScore}/100 (target 95+ achieved).`
-          : `${atsAnalysis.summary} Optimized ATS score: ${afterScore.atsScore}/100. Further gains require real experience covering remaining gaps.`,
+          ? `${atsAnalysis.summary} Optimized ATS score: ${afterScore.atsScore}/100 (target ${TARGET_ATS_SCORE}+ achieved).`
+          : `${atsAnalysis.summary} Optimized ATS score: ${afterScore.atsScore}/100 — the honest ceiling for this resume/JD. Further gains require real experience covering remaining gaps.`,
     },
     missingKeywords: mergedMissing,
     coverLetter,

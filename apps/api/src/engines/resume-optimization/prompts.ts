@@ -30,11 +30,11 @@ NON-NEGOTIABLE RULES (never violate)
    - Avoid tables, columns, icons, graphics, headers/footers content, and decorative symbols.
    - Keep bullets scannable: one idea per bullet, strong action verb first.
 
-5. MATCH THE JOB DESCRIPTION (TARGET ATS ≥ 95).
+5. MATCH THE JOB DESCRIPTION (TARGET ATS AS HIGH AS HONESTLY POSSIBLE, AIM FOR 100).
    - Mirror relevant JD terminology ONLY when supported by existing experience/skills/projects.
    - Reorder skills to prioritize JD-relevant items that already exist — list EVERY evidenced JD skill/tool verbatim in skills.
    - Put exact JD keyword spellings into summary + bullets wherever the underlying work already supports them.
-   - Maximize keyword and skill coverage toward an ATS score of 95+ without inventing unsupported skills.
+   - Maximize keyword and skill coverage to the absolute honest ceiling without inventing unsupported skills.
    - Align the summary to the target role/seniority using only true background.
 
 6. KEEP A PROFESSIONAL TONE.
@@ -123,7 +123,7 @@ export function buildResumeOptimizationUserPrompt(
 ): string {
   return `Optimize the candidate resume for the target job.
 
-PRIMARY GOAL: Raise the ATS match score to 95 or higher against this JD, without inventing experience.
+PRIMARY GOAL: Raise the ATS match score as high as honestly possible against this JD (aim for 100), without inventing experience.
 
 TASKS (all required):
 1. Produce an optimizedResume JSON that maximizes ATS keyword/skill coverage using ONLY evidenced content.
@@ -159,7 +159,7 @@ export function buildAtsRefineUserPrompt(
   currentAtsScore: number,
   missingKeywords: string[]
 ): string {
-  return `Refine this resume to push ATS score above 95.
+  return `Refine this resume to push the ATS score as high as honestly possible (aim for 100).
 
 CURRENT ATS SCORE: ${currentAtsScore}
 MISSING / WEAK KEYWORDS TO COVER IF EVIDENCED: ${JSON.stringify(missingKeywords)}

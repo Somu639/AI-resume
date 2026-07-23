@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ResumeAI - Editor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#f8f9ff",
+                      "on-surface": "#0b1c30",
+                      "tertiary-fixed-dim": "#ffb598",
+                      "on-background": "#0b1c30",
+                      "on-surface-variant": "#3e4947",
+                      "secondary": "#006b5f",
+                      "error-container": "#ffdad6",
+                      "primary": "#005c55",
+                      "on-primary-fixed": "#00201d",
+                      "secondary-fixed-dim": "#4fdbc8",
+                      "on-primary-container": "#a3faef",
+                      "on-error-container": "#93000a",
+                      "error": "#ba1a1a",
+                      "on-tertiary-fixed": "#370e00",
+                      "on-secondary-fixed-variant": "#005048",
+                      "background": "#f8f9ff",
+                      "surface-container-high": "#dce9ff",
+                      "primary-fixed": "#9cf2e8",
+                      "primary-container": "#0f766e",
+                      "surface-variant": "#d3e4fe",
+                      "outline": "#6e7977",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-secondary-fixed": "#00201c",
+                      "tertiary": "#7f4025",
+                      "on-tertiary-fixed-variant": "#72361b",
+                      "surface-dim": "#cbdbf5",
+                      "secondary-fixed": "#71f8e4",
+                      "on-tertiary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "on-primary-fixed-variant": "#00504a",
+                      "surface-bright": "#f8f9ff",
+                      "on-tertiary-container": "#ffe5db",
+                      "on-primary": "#ffffff",
+                      "inverse-surface": "#213145",
+                      "surface-container-low": "#eff4ff",
+                      "primary-fixed-dim": "#80d5cb",
+                      "tertiary-fixed": "#ffdbce",
+                      "outline-variant": "#bdc9c6",
+                      "inverse-primary": "#80d5cb",
+                      "on-secondary": "#ffffff",
+                      "on-secondary-container": "#006f64",
+                      "surface-container": "#e5eeff",
+                      "tertiary-container": "#9c573a",
+                      "surface-tint": "#006a63",
+                      "inverse-on-surface": "#eaf1ff",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-container": "#6df5e1"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "1rem",
+                      "container-max": "1200px",
+                      "margin-desktop": "2.5rem",
+                      "gutter": "1.5rem",
+                      "unit": "8px",
+                      "base": "0.5rem"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Geist"
+                      ],
+                      "headline-lg-mobile": [
+                              "Geist"
+                      ],
+                      "display": [
+                              "Geist"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Geist"
+                      ],
+                      "headline-lg": [
+                              "Geist"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.03em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar (Web only) -->
+<nav class="h-screen w-64 hidden md:flex flex-col border-r border-outline-variant bg-surface fixed left-0 top-0 z-40">
+<div class="p-6 border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight">ResumeAI</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">AI Resume Optimizer</p>
+</div>
+</div>
+</div>
+<div class="flex-1 py-6 px-4 flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">cloud_upload</span>
+<span class="font-body-md">Upload</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md">JD Analysis</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-surface-container text-primary font-bold border-r-2 border-primary opacity-80 scale-[0.99] transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">edit_note</span>
+<span class="font-body-md">Editor</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">ios_share</span>
+<span class="font-body-md">Export</span>
+</a>
+</div>
+<div class="p-4 border-t border-outline-variant flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-sm">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-sm">help_outline</span>
+<span class="font-label-sm text-label-sm">Support</span>
+</a>
+</div>
+</nav>
+<!-- BottomNavBar (Mobile only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 md:hidden bg-surface border-t border-outline-variant shadow-md">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container transition-colors rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container transition-colors rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1">add_circle</span>
+<span class="font-label-sm text-label-sm">Upload</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container transition-colors rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1">troubleshoot</span>
+<span class="font-label-sm text-label-sm">Scan</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-2 scale-95 duration-150" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-sm text-label-sm font-bold">Edit</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container transition-colors rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1">download</span>
+<span class="font-label-sm text-label-sm">Save</span>
+</a>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 flex flex-col h-screen overflow-hidden pb-16 md:pb-0">
+<!-- Sticky Editor Toolbar -->
+<header class="sticky top-0 w-full z-30 bg-surface/90 backdrop-blur-md border-b border-outline-variant px-margin-mobile md:px-margin-desktop py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div class="flex flex-col">
+<h2 class="font-headline-md text-headline-md text-on-surface">Frontend Developer Resume</h2>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm border border-outline-variant">
+                        ATS Score: 45
+                        <span class="material-symbols-outlined text-xs">arrow_forward</span>
+<span class="text-primary font-bold">92</span>
+</span>
+<span class="text-secondary font-label-sm text-label-sm font-medium">(+47 points)</span>
+</div>
+</div>
+<div class="flex items-center gap-3 self-end md:self-auto w-full md:w-auto overflow-x-auto pb-1 md:pb-0 hide-scrollbar">
+<div class="flex items-center bg-surface-container-lowest border border-outline-variant rounded-lg p-1">
+<button class="p-1.5 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors disabled:opacity-50" title="Undo">
+<span class="material-symbols-outlined text-sm">undo</span>
+</button>
+<div class="w-px h-4 bg-outline-variant mx-1"></div>
+<button class="p-1.5 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors disabled:opacity-50" disabled="" title="Redo">
+<span class="material-symbols-outlined text-sm">redo</span>
+</button>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all whitespace-nowrap">
+<span class="material-symbols-outlined text-sm">cycle</span>
+<span class="font-label-sm text-label-sm font-medium">Re-optimize</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container shadow-sm transition-all whitespace-nowrap ml-auto md:ml-0">
+<span class="material-symbols-outlined text-sm">save</span>
+<span class="font-label-sm text-label-sm font-medium">Save Changes</span>
+</button>
+</div>
+</header>
+<!-- Editor Workspace -->
+<div class="flex-1 overflow-hidden flex flex-col lg:flex-row relative">
+<!-- Document Viewers (Side-by-side) -->
+<div class="flex-1 flex flex-col md:flex-row overflow-hidden bg-surface-container-low">
+<!-- Original Resume -->
+<div class="flex-1 flex flex-col border-r border-outline-variant h-full overflow-hidden">
+<div class="px-4 py-2 bg-surface border-b border-outline-variant flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Original Upload</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant text-[10px] font-mono">v1.0</span>
+</div>
+<div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+<div class="bg-surface-container-lowest shadow-sm border border-outline-variant rounded p-8 max-w-[800px] mx-auto min-h-[1056px] font-body-md text-on-surface text-[11px] leading-relaxed relative">
+<!-- Simulated Resume Content -->
+<div class="text-center mb-6">
+<h1 class="text-xl font-bold mb-1">ALEXANDER CHEN</h1>
+<p class="text-on-surface-variant">San Francisco, CA | alex@email.com | (555) 123-4567</p>
+</div>
+<div class="mb-4">
+<h2 class="text-sm font-bold border-b border-outline-variant pb-1 mb-2 uppercase tracking-wide">Experience</h2>
+<div class="mb-3 relative group">
+<div class="flex justify-between font-medium">
+<span>Software Engineer</span>
+<span>TechCorp Inc. | 2020 - Present</span>
+</div>
+<ul class="list-disc pl-4 mt-1 text-on-surface-variant space-y-1">
+<li class="bg-error-container/30 rounded -ml-1 pl-1">Wrote code for the main company website using React.</li>
+<li>Helped fix bugs and improve performance.</li>
+<li class="bg-error-container/30 rounded -ml-1 pl-1">Worked with the design team to make things look good.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Optimized Resume -->
+<div class="flex-1 flex flex-col h-full overflow-hidden">
+<div class="px-4 py-2 bg-surface border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">auto_awesome</span>
+<span class="font-label-sm text-label-sm text-primary font-bold">AI Optimized</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-primary-container text-on-primary-container text-[10px] font-mono">v2.1_ats</span>
+</div>
+<div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
+<div class="bg-surface-container-lowest shadow-sm border border-outline-variant rounded p-8 max-w-[800px] mx-auto min-h-[1056px] font-body-md text-on-surface text-[11px] leading-relaxed">
+<!-- Optimized Content -->
+<div class="text-center mb-6">
+<h1 class="text-xl font-bold mb-1">ALEXANDER CHEN</h1>
+<p class="text-on-surface-variant">San Francisco, CA | alex@email.com | (555) 123-4567</p>
+</div>
+<div class="mb-4">
+<h2 class="text-sm font-bold border-b border-outline-variant pb-1 mb-2 uppercase tracking-wide">Experience</h2>
+<div class="mb-3">
+<div class="flex justify-between font-medium">
+<span>Software Engineer</span>
+<span>TechCorp Inc. | 2020 - Present</span>
+</div>
+<ul class="list-disc pl-4 mt-1 text-on-surface-variant space-y-1">
+<li class="bg-primary-container/20 border-l-2 border-primary -ml-2 pl-2 rounded-r text-on-surface font-medium transition-colors hover:bg-primary-container/30 cursor-pointer" onclick="toggleSuggestion('sug-1')">Architected and developed core features for the flagship enterprise web application utilizing React.js, improving load times by 40%.</li>
+<li>Helped fix bugs and improve performance.</li>
+<li class="bg-primary-container/20 border-l-2 border-primary -ml-2 pl-2 rounded-r text-on-surface font-medium transition-colors hover:bg-primary-container/30 cursor-pointer" onclick="toggleSuggestion('sug-2')">Collaborated cross-functionally with UX/UI designers to implement pixel-perfect, responsive components using Tailwind CSS.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Suggestions Sidebar -->
+<aside class="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-outline-variant bg-surface flex flex-col h-64 lg:h-full transition-all duration-300 shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.05)] z-20">
+<div class="p-4 border-b border-outline-variant bg-surface/95 backdrop-blur">
+<h3 class="font-headline-sm text-headline-sm font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">edit_square</span>
+                        Review Changes
+                    </h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">3 pending suggestions</p>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-surface-container-low/50">
+<!-- Suggestion Card 1 -->
+<div class="bg-surface-container-lowest border border-primary/30 rounded-lg p-4 shadow-sm relative overflow-hidden transition-all duration-200 ring-1 ring-primary/20" id="sug-1">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex justify-between items-start mb-2">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-variant text-on-surface-variant text-[10px] uppercase font-bold tracking-wider">
+                                Action Verb
+                            </span>
+</div>
+<div class="text-sm mb-3">
+<p class="text-on-surface-variant line-through text-xs mb-1 opacity-70">Wrote code for the main company website using React.</p>
+<p class="text-on-surface font-medium leading-tight">Architected and developed core features for the flagship enterprise web application utilizing React.js, improving load times by 40%.</p>
+</div>
+<div class="flex items-center gap-2 mt-4 pt-3 border-t border-outline-variant/50">
+<button class="flex-1 py-1.5 px-3 rounded-md border border-outline-variant text-on-surface-variant hover:bg-error-container hover:text-on-error-container hover:border-error-container transition-colors text-xs font-medium flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[14px]">close</span> Reject
+                            </button>
+<button class="flex-1 py-1.5 px-3 rounded-md bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container transition-colors text-xs font-medium flex items-center justify-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">check</span> Accept
+                            </button>
+</div>
+</div>
+<!-- Suggestion Card 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 shadow-sm relative overflow-hidden transition-all duration-200 opacity-70 hover:opacity-100" id="sug-2">
+<div class="flex justify-between items-start mb-2">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-variant text-on-surface-variant text-[10px] uppercase font-bold tracking-wider">
+                                Specificity
+                            </span>
+</div>
+<div class="text-sm mb-3">
+<p class="text-on-surface-variant line-through text-xs mb-1 opacity-70">Worked with the design team to make things look good.</p>
+<p class="text-on-surface font-medium leading-tight">Collaborated cross-functionally with UX/UI designers to implement pixel-perfect, responsive components using Tailwind CSS.</p>
+</div>
+<div class="flex items-center gap-2 mt-4 pt-3 border-t border-outline-variant/50">
+<button class="flex-1 py-1.5 px-3 rounded-md border border-outline-variant text-on-surface-variant hover:bg-error-container hover:text-on-error-container hover:border-error-container transition-colors text-xs font-medium flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[14px]">close</span> Reject
+                            </button>
+<button class="flex-1 py-1.5 px-3 rounded-md bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container transition-colors text-xs font-medium flex items-center justify-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">check</span> Accept
+                            </button>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: var(--tw-colors-outline-variant);
+            border-radius: 10px;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script>
+        // Simple micro-interaction for suggestion cards
+        function toggleSuggestion(id) {
+            const cards = document.querySelectorAll('aside > div:nth-child(2) > div');
+            cards.forEach(c => {
+                c.classList.remove('ring-1', 'ring-primary/20', 'border-primary/30', 'opacity-100');
+                c.classList.add('opacity-70', 'border-outline-variant');
+                const indicator = c.querySelector('.absolute.w-1');
+                if(indicator) indicator.remove();
+            });
+
+            const target = document.getElementById(id);
+            if(target) {
+                target.classList.remove('opacity-70', 'border-outline-variant');
+                target.classList.add('ring-1', 'ring-primary/20', 'border-primary/30', 'opacity-100');
+                if(!target.querySelector('.absolute.w-1')) {
+                    const ind = document.createElement('div');
+                    ind.className = 'absolute left-0 top-0 bottom-0 w-1 bg-primary';
+                    target.prepend(ind);
+                }
+                target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+    </script>
+</body></html>

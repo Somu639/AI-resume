@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JD Analysis - ResumeAI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface": "#f8f9ff",
+                    "on-surface": "#0b1c30",
+                    "tertiary-fixed-dim": "#ffb598",
+                    "on-background": "#0b1c30",
+                    "on-surface-variant": "#3e4947",
+                    "secondary": "#006b5f",
+                    "error-container": "#ffdad6",
+                    "primary": "#005c55",
+                    "on-primary-fixed": "#00201d",
+                    "secondary-fixed-dim": "#4fdbc8",
+                    "on-primary-container": "#a3faef",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed": "#370e00",
+                    "on-secondary-fixed-variant": "#005048",
+                    "background": "#f8f9ff",
+                    "surface-container-high": "#dce9ff",
+                    "primary-fixed": "#9cf2e8",
+                    "primary-container": "#0f766e",
+                    "surface-variant": "#d3e4fe",
+                    "outline": "#6e7977",
+                    "surface-container-highest": "#d3e4fe",
+                    "on-secondary-fixed": "#00201c",
+                    "tertiary": "#7f4025",
+                    "on-tertiary-fixed-variant": "#72361b",
+                    "surface-dim": "#cbdbf5",
+                    "secondary-fixed": "#71f8e4",
+                    "on-tertiary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-primary-fixed-variant": "#00504a",
+                    "surface-bright": "#f8f9ff",
+                    "on-tertiary-container": "#ffe5db",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#213145",
+                    "surface-container-low": "#eff4ff",
+                    "primary-fixed-dim": "#80d5cb",
+                    "tertiary-fixed": "#ffdbce",
+                    "outline-variant": "#bdc9c6",
+                    "inverse-primary": "#80d5cb",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#006f64",
+                    "surface-container": "#e5eeff",
+                    "tertiary-container": "#9c573a",
+                    "surface-tint": "#006a63",
+                    "inverse-on-surface": "#eaf1ff",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-container": "#6df5e1"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "1rem",
+                    "container-max": "1200px",
+                    "margin-desktop": "2.5rem",
+                    "gutter": "1.5rem",
+                    "unit": "8px",
+                    "base": "0.5rem"
+            },
+            "fontFamily": {
+                    "headline-md": [
+                            "Geist"
+                    ],
+                    "headline-lg-mobile": [
+                            "Geist"
+                    ],
+                    "display": [
+                            "Geist"
+                    ],
+                    "body-lg": [
+                            "Inter"
+                    ],
+                    "label-sm": [
+                            "Geist"
+                    ],
+                    "headline-lg": [
+                            "Geist"
+                    ],
+                    "body-md": [
+                            "Inter"
+                    ]
+            },
+            "fontSize": {
+                    "headline-md": [
+                            "20px",
+                            {
+                                    "lineHeight": "1.3",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "24px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "display": [
+                            "48px",
+                            {
+                                    "lineHeight": "1.1",
+                                    "letterSpacing": "-0.04em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-lg": [
+                            "16px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-sm": [
+                            "12px",
+                            {
+                                    "lineHeight": "1",
+                                    "letterSpacing": "0.01em",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "letterSpacing": "-0.03em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "1.5",
+                                    "fontWeight": "400"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .chip-enter {
+            animation: chipEnter 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        @keyframes chipEnter {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .stagger-1 { animation-delay: 100ms; }
+        .stagger-2 { animation-delay: 200ms; }
+        .stagger-3 { animation-delay: 300ms; }
+        .stagger-4 { animation-delay: 400ms; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col md:flex-row antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar (Mobile) -->
+<header class="md:hidden sticky top-0 w-full z-50 flex justify-between items-center px-margin-mobile py-4 bg-surface/80 backdrop-blur-md border-b border-outline-variant shadow-sm transition-all duration-200">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary font-bold text-2xl">document_scanner</span>
+<span class="font-headline-md text-headline-md font-extrabold text-primary">ResumeAI</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-all duration-200 scale-95 active:scale-90">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<img alt="User Avatar" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A small, professional circular avatar portrait of a user. The lighting is soft and flattering, typical of a modern professional headshot. The background is a clean, neutral gradient, keeping the focus entirely on the person. The image style is realistic and high-quality, fitting perfectly into a modern tech application interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9NINRMXdBslb_7Lh_J7xvjBA_IbW9oLjg-9fatZUeZOHo-aBfceOBPbGkfdx4y8PQf9f3Mq_kuYhDACQbkYmriqw38RRoyU35dxuuZ9KELRm108zmK6iv6CtqzMCR47KTxkyxu8kd_OwUwe-0MWGHaWWILerKM8e10dB1KJMAZY6Hn8N8WzDiZ8_P-2I58CTbtkJ4iTFOnFcnSj3-ycMcDP_vzaPD7PHPDKI9HWqNXNz8-3LoeHGz"/>
+</div>
+</header>
+<!-- SideNavBar (Desktop) -->
+<nav class="fixed left-0 top-0 h-full z-40 w-64 hidden md:flex flex-col bg-surface border-r border-outline-variant">
+<div class="p-6 flex items-center gap-3 border-b border-outline-variant">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined font-bold">document_scanner</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">ResumeAI</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">AI Resume Optimizer</p>
+</div>
+</div>
+<div class="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors duration-200 Active: opacity-80 scale-[0.99]" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-md text-body-md font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors duration-200 Active: opacity-80 scale-[0.99]" href="#">
+<span class="material-symbols-outlined" data-icon="cloud_upload">cloud_upload</span>
+<span class="font-body-md text-body-md font-medium">Upload</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-bold border-r-2 border-primary bg-surface-container-low" href="#">
+<span class="material-symbols-outlined" data-icon="analytics" data-weight="fill" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-body-md text-body-md font-bold">JD Analysis</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors duration-200 Active: opacity-80 scale-[0.99]" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="font-body-md text-body-md font-medium">Editor</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors duration-200 Active: opacity-80 scale-[0.99]" href="#">
+<span class="material-symbols-outlined" data-icon="ios_share">ios_share</span>
+<span class="font-body-md text-body-md font-medium">Export</span>
+</a>
+</div>
+<div class="p-4 border-t border-outline-variant space-y-2">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-md text-body-md font-medium">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-body-md text-body-md font-medium">Support</span>
+</a>
+<div class="mt-4 pt-4 border-t border-outline-variant flex items-center gap-3 px-4">
+<img alt="User profile" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A small, professional circular avatar portrait of a user. The lighting is soft and flattering, typical of a modern professional headshot. The background is a clean, neutral gradient, keeping the focus entirely on the person. The image style is realistic and high-quality, fitting perfectly into a modern tech application interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDefywhltnHJra38Nl03GJoWALtiy-tqyaC6qWHprGu52KziFoT6UQepZbrUhLbroybQirG6wao78IvtAgD3Jl3cOpT-HyezKJ2_rOPFxmG2Czk5rti0gTbORlSoUjrcxCaKGplXTfsgTc19kp_HKp2WWGGYYtFdVtymarlCtTg6ofewxrpD5ZetqISM3rQwRWa3kaGORiWMUj7mwCFZFGXkXONBpVLPlszXsJXrO8erSDWZUxpVXLw"/>
+<div class="flex-1 min-w-0">
+<p class="font-body-md text-body-md font-medium truncate">Alex Carter</p>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Canvas -->
+<main class="flex-1 md:ml-64 pb-20 md:pb-0 min-h-screen">
+<div class="max-w-[container-max] mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-12 space-y-12">
+<!-- Header Section -->
+<section class="animate-fade-in-up">
+<h2 class="font-display text-display text-on-surface mb-4">Job Description Analysis</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Paste the target job description below. Our AI will extract key requirements, tools, and responsibilities to help tailor your resume perfectly.</p>
+</section>
+<!-- Input Section -->
+<section class="animate-fade-in-up stagger-1">
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all duration-200">
+<div class="bg-surface-container-low px-4 py-3 border-b border-outline-variant flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium uppercase tracking-wider">Paste JD Here</span>
+<button class="text-on-surface-variant hover:text-primary transition-colors text-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-base">content_paste</span>
+                            Paste from Clipboard
+                        </button>
+</div>
+<textarea class="w-full h-64 p-6 bg-transparent border-none resize-none font-body-md text-body-md text-on-surface placeholder:text-outline focus:ring-0" placeholder="e.g., We are looking for a Senior Product Designer with 5+ years of experience in creating user-centric digital products. You must be proficient in Figma, Framer, and have a strong understanding of design systems. Experience with agile methodologies and cross-functional team collaboration is required..."></textarea>
+</div>
+<div class="mt-6 flex justify-end">
+<button class="bg-primary text-on-primary hover:bg-surface-tint font-headline-md text-headline-md px-8 py-3 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2 transform active:scale-95">
+<span class="material-symbols-outlined">auto_awesome</span>
+                        Analyze Job Description
+                    </button>
+</div>
+</section>
+<!-- Results Section (Bento Grid Style) -->
+<section class="animate-fade-in-up stagger-2 border-t border-outline-variant pt-12">
+<div class="flex items-center gap-3 mb-8">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface">Analysis Results</h3>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left Column: Chips -->
+<div class="lg:col-span-1 space-y-6">
+<!-- Required Skills -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm">
+<h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-error">star</span>
+                                Required Skills
+                            </h4>
+<div class="flex flex-wrap gap-2">
+<span class="chip-enter stagger-1 px-3 py-1.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm border border-error/20">Product Design</span>
+<span class="chip-enter stagger-2 px-3 py-1.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm border border-error/20">User Research</span>
+<span class="chip-enter stagger-3 px-3 py-1.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm border border-error/20">Agile</span>
+<span class="chip-enter stagger-4 px-3 py-1.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm border border-error/20">5+ Yrs Exp</span>
+</div>
+</div>
+<!-- Tools & Tech -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm">
+<h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-secondary">build</span>
+                                Tools &amp; Technology
+                            </h4>
+<div class="flex flex-wrap gap-2">
+<span class="chip-enter stagger-2 px-3 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm border border-secondary/20">Figma</span>
+<span class="chip-enter stagger-3 px-3 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm border border-secondary/20">Framer</span>
+<span class="chip-enter stagger-4 px-3 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm border border-secondary/20">Jira</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Responsibilities -->
+<div class="lg:col-span-2">
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 md:p-8 shadow-sm h-full">
+<h4 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary">list_alt</span>
+                                Key Responsibilities Extracted
+                            </h4>
+<ul class="space-y-4">
+<li class="flex items-start gap-3 p-4 rounded-lg bg-surface hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant">
+<span class="material-symbols-outlined text-primary mt-0.5">subdirectory_arrow_right</span>
+<p class="font-body-md text-body-md text-on-surface">Lead the end-to-end design process for core product features, from initial research to final execution.</p>
+</li>
+<li class="flex items-start gap-3 p-4 rounded-lg bg-surface hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant">
+<span class="material-symbols-outlined text-primary mt-0.5">subdirectory_arrow_right</span>
+<p class="font-body-md text-body-md text-on-surface">Collaborate closely with product managers and engineering teams to ensure high-quality implementation of designs.</p>
+</li>
+<li class="flex items-start gap-3 p-4 rounded-lg bg-surface hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant">
+<span class="material-symbols-outlined text-primary mt-0.5">subdirectory_arrow_right</span>
+<p class="font-body-md text-body-md text-on-surface">Maintain and evolve the internal design system to ensure consistency across the platform.</p>
+</li>
+<li class="flex items-start gap-3 p-4 rounded-lg bg-surface hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant">
+<span class="material-symbols-outlined text-primary mt-0.5">subdirectory_arrow_right</span>
+<p class="font-body-md text-body-md text-on-surface">Conduct user testing and gather feedback to iteratively improve the user experience.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 md:hidden bg-surface border-t border-outline-variant shadow-md">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container transition-colors Active: scale-95 duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container transition-colors Active: scale-95 duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="font-label-sm text-label-sm mt-1">Upload</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-2 Active: scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="troubleshoot" data-weight="fill" style="font-variation-settings: 'FILL' 1;">troubleshoot</span>
+<span class="font-label-sm text-label-sm mt-1 font-bold">Scan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container transition-colors Active: scale-95 duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-sm text-label-sm mt-1">Edit</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container transition-colors Active: scale-95 duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+<span class="font-label-sm text-label-sm mt-1">Save</span>
+</a>
+</nav>
+</body></html>

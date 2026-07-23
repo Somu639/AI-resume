@@ -61,8 +61,13 @@ app.use(metricsMiddleware);
 
 app.get("/metrics", metricsHandler);
 
-app.get("/", (_req, res) => {
-  res.status(200).json({
+app.get("/", (req, res) => {
+  // Browsers hitting the API host are redirected to the actual app;
+  // API clients / monitoring (JSON) still get a status payload.
+  if (req.accepts(["html", "json"]) === "html") {
+    return res.redirect(302, env.CLIENT_URL);
+  }
+  return res.status(200).json({
     service: "resumeai-api",
     status: "ok",
     health: "/api/v1/health",

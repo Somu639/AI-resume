@@ -89,6 +89,11 @@ if (env.isProd) {
   if (!env.DATABASE_URL) {
     envWarnings.push("DATABASE_URL is not set — database routes will fail");
   }
+  if (!env.AWS_ACCESS_KEY_ID || !env.AWS_SECRET_ACCESS_KEY) {
+    envWarnings.push(
+      "AWS credentials not set — S3 storage disabled (uploads parsed to DB only)"
+    );
+  }
   if (envWarnings.length) {
     console.warn("[resumeai-api] production env warnings:", envWarnings.join("; "));
   }

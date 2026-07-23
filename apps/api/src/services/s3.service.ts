@@ -10,8 +10,9 @@ import { AppError } from "../middleware/errorHandler";
 
 /**
  * AWS S3 storage adapter.
- * In development without credentials, falls back to an in-memory map
- * so local flows still work (not for production).
+ * When AWS credentials are not configured, falls back to an in-memory map
+ * so upload/parse/optimize flows still work (in any environment). S3 is
+ * optional — resume text/JSON is persisted in Postgres, not S3.
  */
 const memoryStore = new Map<string, Buffer>();
 
@@ -37,7 +38,8 @@ export const s3Service = {
     body: Buffer;
     contentType: string;
   }) {
-    if (!hasAwsCreds() && !env.isProd) {
+    if (!hasAwsCreds()) {
+      // S3 not configured — keep the flow working without object storage.
       memoryStore.set(input.key, input.body);
       return { key: input.key, bucket: env.S3_BUCKET, mocked: true };
     }
@@ -62,7 +64,7 @@ export const s3Service = {
   },
 
   async getSignedUrl(key: string, expiresInSeconds = 300) {
-    if (!hasAwsCreds() && !env.isProd) {
+    if (!hasAwsCreds()) {
       return `memory://${key}`;
     }
     return getSignedUrl(
@@ -73,7 +75,7 @@ export const s3Service = {
   },
 
   async delete(key: string) {
-    if (!hasAwsCreds() && !env.isProd) {
+    if (!hasAwsCreds()) {
       memoryStore.delete(key);
       return;
     }

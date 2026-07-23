@@ -29,6 +29,8 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional().default(""),
   GOOGLE_CLIENT_SECRET: z.string().optional().default(""),
   OPENAI_API_KEY: z.string().optional().default(""),
+  /** Optional second key used as automatic failover when the primary is rate-limited. */
+  OPENAI_API_KEY_FALLBACK: z.string().optional().default(""),
   OPENAI_MODEL: z.string().default("llama-3.3-70b-versatile"),
   /** Optional OpenAI-compatible base URL (Groq free: https://api.groq.com/openai/v1) */
   OPENAI_BASE_URL: z

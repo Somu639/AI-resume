@@ -1,6 +1,5 @@
-import OpenAI from "openai";
 import { AppError } from "../../middleware/errorHandler";
-import { createLlmClient, getLlmModel } from "../../lib/openai";
+import { chatJsonWithFailover } from "../../lib/openai";
 import {
   analyzeJobDescriptionInputSchema,
   jobDescriptionAnalysisSchema,
@@ -71,32 +70,12 @@ export async function analyzeJobDescription(
     );
   }
 
-  const client = createLlmClient();
-
-  let completion: OpenAI.Chat.Completions.ChatCompletion;
-  try {
-    completion = await client.chat.completions.create({
-      model: getLlmModel(),
-      temperature: 0.1,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: JD_ANALYSIS_SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: buildJdAnalysisUserPrompt(input.data.jobDescription),
-        },
-      ],
-    });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unknown OpenAI error";
-    throw new AppError(502, `OpenAI JD analysis failed: ${message}`);
-  }
-
-  const content = completion.choices[0]?.message?.content;
-  if (!content) {
-    throw new AppError(502, "OpenAI returned an empty JD analysis response");
-  }
+  const content = await chatJsonWithFailover({
+    system: JD_ANALYSIS_SYSTEM_PROMPT,
+    user: buildJdAnalysisUserPrompt(input.data.jobDescription),
+    temperature: 0.1,
+    label: "JD analysis",
+  });
 
   const parsed = parseModelJson(content);
   const validated = jobDescriptionAnalysisSchema.safeParse(parsed);

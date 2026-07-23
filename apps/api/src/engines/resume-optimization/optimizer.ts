@@ -1,6 +1,10 @@
-import OpenAI from "openai";
 import { AppError } from "../../middleware/errorHandler";
-import { createLlmClient, getLlmModel } from "../../lib/openai";
+import {
+  chatJsonWithFailover,
+  createLlmClients,
+  isRateLimitError,
+  type LlmClient,
+} from "../../lib/openai";
 import { scoreAts } from "../ats-scoring";
 import { boostResumeForAts } from "./ats-booster";
 import {
@@ -33,19 +37,6 @@ const TARGET_ATS_SCORE = 96;
  * lifting, so extra LLM passes rarely help but always cost tokens.
  */
 const MAX_REFINE_PASSES = 1;
-
-/** Detect provider rate-limit / daily-quota errors so we can degrade gracefully. */
-function isRateLimitError(error: unknown): boolean {
-  const message =
-    error instanceof AppError
-      ? error.message
-      : error instanceof Error
-        ? error.message
-        : String(error);
-  return /\b429\b|rate[\s-]?limit|tokens? per day|\bTPD\b|quota|too many requests/i.test(
-    message
-  );
-}
 
 function parseModelJson(content: string, label: string): unknown {
   const trimmed = content.trim();
@@ -143,31 +134,17 @@ type ModelOutput = {
 };
 
 async function callOptimizeModel(
-  client: OpenAI,
+  clients: LlmClient[],
   system: string,
   user: string
 ): Promise<ModelOutput> {
-  let completion: OpenAI.Chat.Completions.ChatCompletion;
-  try {
-    completion = await client.chat.completions.create({
-      model: getLlmModel(),
-      temperature: 0.12,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-    });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unknown OpenAI error";
-    throw new AppError(502, `OpenAI resume optimization failed: ${message}`);
-  }
-
-  const content = completion.choices[0]?.message?.content;
-  if (!content) {
-    throw new AppError(502, "OpenAI returned an empty optimization response");
-  }
+  const content = await chatJsonWithFailover({
+    clients,
+    system,
+    user,
+    temperature: 0.12,
+    label: "resume optimization",
+  });
 
   const modelJson = parseModelJson(content, "resume optimization");
   const modelParsed = optimizeResumeModelOutputSchema.safeParse(modelJson);
@@ -273,12 +250,12 @@ export async function optimizeResume(
 
   const { resume, jobDescription } = parsed.data;
   const beforeScore = scoreResumeAgainstJob(resume, jobDescription);
-  const client = createLlmClient();
+  const clients = createLlmClients();
 
   let modelOut: ModelOutput;
   try {
     modelOut = await callOptimizeModel(
-      client,
+      clients,
       RESUME_OPTIMIZATION_SYSTEM_PROMPT,
       buildResumeOptimizationUserPrompt(resume, jobDescription)
     );
@@ -325,7 +302,7 @@ export async function optimizeResume(
     let refineOut: ModelOutput;
     try {
       refineOut = await callOptimizeModel(
-        client,
+        clients,
         RESUME_OPTIMIZATION_SYSTEM_PROMPT,
         buildAtsRefineUserPrompt(
           working,
@@ -448,35 +425,15 @@ export async function generateCoverLetter(input: {
     throw new AppError(400, "Invalid cover letter input");
   }
 
-  const client = createLlmClient();
-  let completion: OpenAI.Chat.Completions.ChatCompletion;
-
-  try {
-    completion = await client.chat.completions.create({
-      model: getLlmModel(),
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: COVER_LETTER_SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: buildCoverLetterUserPrompt(
-            resumeParsed.data.resume,
-            resumeParsed.data.jobDescription
-          ),
-        },
-      ],
-    });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unknown OpenAI error";
-    throw new AppError(502, `OpenAI cover letter generation failed: ${message}`);
-  }
-
-  const content = completion.choices[0]?.message?.content;
-  if (!content) {
-    throw new AppError(502, "OpenAI returned an empty cover letter response");
-  }
+  const content = await chatJsonWithFailover({
+    system: COVER_LETTER_SYSTEM_PROMPT,
+    user: buildCoverLetterUserPrompt(
+      resumeParsed.data.resume,
+      resumeParsed.data.jobDescription
+    ),
+    temperature: 0.2,
+    label: "cover letter generation",
+  });
 
   const letterParsed = coverLetterSchema.safeParse(
     parseModelJson(content, "cover letter")

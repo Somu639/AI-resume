@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Columns2, Loader2, Redo2, Sparkles, Undo2 } from "lucide-react";
+import { Columns2, Loader2, Redo2, Rocket, Sparkles, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/motion";
 import { TipTapEditor } from "@/components/editor/tip-tap-editor";
@@ -138,9 +138,10 @@ export function LiveResumeEditor() {
               Save version
             </Button>
             <Button
+              variant="outline"
               size="sm"
               disabled={isReoptimizing}
-              onClick={() => void rerun()}
+              onClick={() => void rerun({ aggressive: false })}
             >
               {isReoptimizing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -148,6 +149,19 @@ export function LiveResumeEditor() {
                 <Sparkles className="h-4 w-4" />
               )}
               Re-optimize
+            </Button>
+            <Button
+              size="sm"
+              disabled={isReoptimizing}
+              onClick={() => void rerun({ aggressive: true })}
+              title="Injects all JD keywords to maximize ATS score (>95). May add skills you can't fully back up."
+            >
+              {isReoptimizing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Rocket className="h-4 w-4" />
+              )}
+              Max ATS (&gt;95)
             </Button>
           </div>
         }

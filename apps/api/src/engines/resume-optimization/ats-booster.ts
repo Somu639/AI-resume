@@ -1,4 +1,4 @@
-﻿import { textIncludesTerm } from "../ats-scoring/utils";
+﻿import { parseYearsRequired, textIncludesTerm } from "../ats-scoring/utils";
 import type { OptimizeResumeRequest, ResumeJson } from "./schema";
 import { resumeJsonToText } from "./serialize";
 
@@ -63,14 +63,29 @@ function collectJdTerms(job: Job): string[] {
   return out;
 }
 
+export type BoostOptions = {
+  /**
+   * Aggressive keyword mode: inject EVERY JD term (skills/tools/keywords) into
+   * the resume regardless of whether it is evidenced, and assert the JD's
+   * required years of experience. This maximizes ATS keyword coverage to push
+   * the score >95, at the cost of adding skills the candidate may not hold.
+   * Off by default — honest, evidenced-only boosting is the default.
+   */
+  aggressive?: boolean;
+};
+
 /**
- * Deterministic ATS booster â€” only promotes JD terms already evidenced
- * in the resume corpus (never invents employers/roles/metrics).
+ * Deterministic ATS booster.
+ * Default: only promotes JD terms already evidenced in the resume corpus
+ * (never invents employers/roles/metrics).
+ * Aggressive: promotes all JD terms for maximum ATS coverage (keyword-stuffing).
  */
 export function boostResumeForAts(
   resume: ResumeJson,
-  job: Job
+  job: Job,
+  options: BoostOptions = {}
 ): { resume: ResumeJson; promotedKeywords: string[] } {
+  const aggressive = Boolean(options.aggressive);
   const corpus = resumeJsonToText(resume);
   const jdTerms = collectJdTerms(job);
   const promotedKeywords: string[] = [];
@@ -80,7 +95,8 @@ export function boostResumeForAts(
 
   for (const term of jdTerms) {
     if (skillKeys.has(term.toLowerCase())) continue;
-    if (!corpusIncludes(corpus, term)) continue;
+    // Honest mode requires evidence; aggressive mode injects unconditionally.
+    if (!aggressive && !corpusIncludes(corpus, term)) continue;
     existingSkills.push(term);
     skillKeys.add(term.toLowerCase());
     promotedKeywords.push(term);
@@ -102,17 +118,26 @@ export function boostResumeForAts(
     dedupedSkills.push(skill);
   }
 
-  // Strengthen summary with evidenced JD terms (no new claims)
+  // Strengthen summary with JD terms.
   let summary = resume.personalInfo.summary?.trim() ?? "";
   const summaryMissing = jdTerms
-    .filter((t) => corpusIncludes(corpus, t) && !corpusIncludes(summary, t))
-    .slice(0, 8);
+    .filter((t) => (aggressive || corpusIncludes(corpus, t)) && !corpusIncludes(summary, t))
+    .slice(0, aggressive ? 20 : 8);
   if (summaryMissing.length) {
     const keywordClause = summaryMissing.join(", ");
     if (summary) {
       summary = `${summary} Core strengths aligned to this role include ${keywordClause}.`;
     } else {
       summary = `Professional with experience spanning ${keywordClause}.`;
+    }
+  }
+
+  // Aggressive mode: assert the JD's required years so the experience-years
+  // sub-score clears the bar (keyword-stuffing tradeoff, accepted by the user).
+  if (aggressive) {
+    const yearsRequired = parseYearsRequired(job.experience);
+    if (yearsRequired != null && !/\b\d+\s*\+?\s*years?\b/i.test(summary)) {
+      summary = `${yearsRequired}+ years of professional experience. ${summary}`.trim();
     }
   }
 
@@ -126,22 +151,23 @@ export function boostResumeForAts(
     const entryText = [jobItem.title, jobItem.company, ...bullets].join("\n");
     const bulletsText = bullets.join("\n");
 
-    const evidencedHere: string[] = [];
+    const surfaced: string[] = [];
     const seenHere = new Set<string>();
     for (const term of jdTerms) {
       const key = term.toLowerCase();
       if (seenHere.has(key)) continue;
       // Present verbatim already? skip.
       if (textIncludesTerm(bulletsText, term)) continue;
-      // Only surface if this role's own text evidences it (alias-aware).
-      if (!corpusIncludes(entryText, term)) continue;
+      // Honest mode: only surface terms evidenced in this role (alias-aware).
+      // Aggressive mode: surface all JD terms.
+      if (!aggressive && !corpusIncludes(entryText, term)) continue;
       seenHere.add(key);
-      evidencedHere.push(term);
+      surfaced.push(term);
     }
 
-    if (evidencedHere.length) {
+    if (surfaced.length) {
       bullets.push(
-        `Key tools & technologies: ${evidencedHere.slice(0, 14).join(", ")}`
+        `Key tools & technologies: ${surfaced.slice(0, aggressive ? 24 : 14).join(", ")}`
       );
     }
 
@@ -153,23 +179,14 @@ export function boostResumeForAts(
     return { ...jobItem, bullets };
   });
 
-  // Mirror evidenced tools into project technologies when projects exist
+  // Mirror JD tools into project technologies when projects exist.
   const projects = resume.projects.map((project) => {
     const tech = [...(project.technologies ?? [])];
     const techKeys = new Set(tech.map((t) => t.toLowerCase()));
-    const projectCorpus = [
-      project.name,
-      project.description ?? "",
-      ...project.bullets,
-      ...tech,
-    ].join("\n");
-    for (const term of jdTerms.slice(0, 15)) {
+    for (const term of jdTerms.slice(0, aggressive ? jdTerms.length : 15)) {
       if (techKeys.has(term.toLowerCase())) continue;
-      if (!corpusIncludes(projectCorpus, term) && !corpusIncludes(corpus, term)) {
-        continue;
-      }
-      // Only attach if already evidenced somewhere on resume
-      if (!corpusIncludes(corpus, term)) continue;
+      // Honest mode: only attach terms already evidenced somewhere on resume.
+      if (!aggressive && !corpusIncludes(corpus, term)) continue;
       tech.push(term);
       techKeys.add(term.toLowerCase());
       if (!promotedKeywords.includes(term)) promotedKeywords.push(term);

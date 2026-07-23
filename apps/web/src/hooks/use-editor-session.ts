@@ -85,8 +85,9 @@ export function useEditorSession() {
   const initialRan = useRef(false);
 
   const runOptimize = useCallback(
-    async (options?: { force?: boolean }) => {
+    async (options?: { force?: boolean; aggressive?: boolean }) => {
       const force = Boolean(options?.force);
+      const aggressive = Boolean(options?.aggressive);
       const resumeId =
         searchParams.get("resumeId") ||
         sessionStorage.getItem("resumeai_resume_id");
@@ -141,6 +142,7 @@ export function useEditorSession() {
             resume: originalResume,
             jobDescription: job,
             resumeId,
+            aggressive,
           }),
         });
 
@@ -203,7 +205,11 @@ export function useEditorSession() {
     void runOptimize({ force: false });
   }, [runOptimize]);
 
-  const rerun = useCallback(() => runOptimize({ force: true }), [runOptimize]);
+  const rerun = useCallback(
+    (opts?: { aggressive?: boolean }) =>
+      runOptimize({ force: true, aggressive: opts?.aggressive }),
+    [runOptimize]
+  );
 
   return { status, error, isReoptimizing, rerun };
 }

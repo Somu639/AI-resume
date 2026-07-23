@@ -24,8 +24,9 @@ export const openaiService = {
   async generateOptimizedResume(input: {
     resume: Parameters<typeof optimizeResume>[0]["resume"];
     jobDescription: Parameters<typeof optimizeResume>[0]["jobDescription"];
+    aggressive?: boolean;
   }) {
-    return optimizeResume(input);
+    return optimizeResume({ aggressive: false, ...input });
   },
 
   async generateCoverLetter(input: {

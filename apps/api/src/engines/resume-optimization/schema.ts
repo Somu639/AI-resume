@@ -152,6 +152,11 @@ export const optimizeResumeRequestSchema = z.object({
   jobDescription: jobDescriptionJsonSchema,
   /** When set with an authenticated user, persist a new ResumeVersion */
   resumeId: z.string().min(1).optional(),
+  /**
+   * Aggressive keyword mode: inject all JD keywords/skills to maximize ATS
+   * score (>95) even without evidence. Off by default (honest mode).
+   */
+  aggressive: z.boolean().optional().default(false),
 });
 
 export const optimizeResumeModelOutputSchema = z.object({

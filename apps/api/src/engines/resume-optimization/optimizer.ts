@@ -169,9 +169,10 @@ async function callOptimizeModel(
 function buildDeterministicOptimization(
   resume: ResumeJson,
   job: OptimizeResumeRequest["jobDescription"],
-  beforeScore: ReturnType<typeof scoreResumeAgainstJob>
+  beforeScore: ReturnType<typeof scoreResumeAgainstJob>,
+  aggressive = false
 ): OptimizeResumeResult {
-  const boosted = boostResumeForAts(resume, job);
+  const boosted = boostResumeForAts(resume, job, { aggressive });
   const working = boosted.resume;
   const afterScore = scoreResumeAgainstJob(working, job);
 
@@ -181,8 +182,9 @@ function buildDeterministicOptimization(
       type: "added",
       section: "skills",
       after: boosted.promotedKeywords.join(", "),
-      reason:
-        "Promoted JD keywords already evidenced in the resume (offline ATS boost — AI writer was temporarily rate-limited)",
+      reason: aggressive
+        ? "Injected JD keywords for maximum ATS coverage (aggressive mode, offline — AI writer was rate-limited)"
+        : "Promoted JD keywords already evidenced in the resume (offline ATS boost — AI writer was temporarily rate-limited)",
     });
   }
 
@@ -248,7 +250,7 @@ export async function optimizeResume(
     );
   }
 
-  const { resume, jobDescription } = parsed.data;
+  const { resume, jobDescription, aggressive } = parsed.data;
   const beforeScore = scoreResumeAgainstJob(resume, jobDescription);
   const clients = createLlmClients();
 
@@ -262,7 +264,12 @@ export async function optimizeResume(
   } catch (error) {
     // Daily token / rate limit exhausted → still deliver an optimized resume.
     if (isRateLimitError(error)) {
-      return buildDeterministicOptimization(resume, jobDescription, beforeScore);
+      return buildDeterministicOptimization(
+        resume,
+        jobDescription,
+        beforeScore,
+        aggressive
+      );
     }
     throw error;
   }
@@ -275,14 +282,15 @@ export async function optimizeResume(
   let coverLetter = modelOut.coverLetter;
 
   {
-    const boosted = boostResumeForAts(working, jobDescription);
+    const boosted = boostResumeForAts(working, jobDescription, { aggressive });
     if (boosted.promotedKeywords.length) {
       modifications.push({
         type: "added",
         section: "skills",
         after: boosted.promotedKeywords.join(", "),
-        reason:
-          "Promoted JD keywords already evidenced in the resume for ATS parsers",
+        reason: aggressive
+          ? "Injected JD keywords for maximum ATS coverage (aggressive mode)"
+          : "Promoted JD keywords already evidenced in the resume for ATS parsers",
       });
     }
     working = boosted.resume;
@@ -321,7 +329,9 @@ export async function optimizeResume(
     }
     assertIdentityPreserved(resume, refineOut.optimizedResume);
 
-    const boosted = boostResumeForAts(refineOut.optimizedResume, jobDescription);
+    const boosted = boostResumeForAts(refineOut.optimizedResume, jobDescription, {
+      aggressive,
+    });
     const candidate = boosted.resume;
     const candidateScore = scoreResumeAgainstJob(candidate, jobDescription);
 
@@ -340,7 +350,9 @@ export async function optimizeResume(
               type: "added" as const,
               section: "skills",
               after: boosted.promotedKeywords.join(", "),
-              reason: `ATS keyword promotion pass ${pass} (evidenced only)`,
+              reason: aggressive
+                ? `ATS keyword injection pass ${pass} (aggressive mode)`
+                : `ATS keyword promotion pass ${pass} (evidenced only)`,
             },
           ]
         : []),

@@ -61,8 +61,18 @@ app.use(metricsMiddleware);
 
 app.get("/metrics", metricsHandler);
 
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    service: "resumeai-api",
+    status: "ok",
+    health: "/api/v1/health",
+    api: "/api/v1",
+    app: env.CLIENT_URL,
+  });
+});
+
 function optionalApiKey(req: Request, res: Response, next: NextFunction) {
-  if (req.path === "/health" || req.path.startsWith("/health/")) {
+  if (req.path === "/" || req.path === "/health" || req.path.startsWith("/health/")) {
     return next();
   }
   // Auth endpoints stay public

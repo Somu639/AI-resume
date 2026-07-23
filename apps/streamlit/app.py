@@ -1,7 +1,9 @@
 """
-ResumeAI Streamlit Backend
-Production AI operations console + backend workflows.
-Connects to PostgreSQL and AWS S3; calls the REST API when available.
+ResumeAI — Streamlit frontend + backend console.
+
+Frontend: account + AI workflow pages (sidebar).
+Backend: system health / Postgres / S3 ops page.
+Calls the shared REST API (Vercel) when available.
 """
 
 from __future__ import annotations
@@ -12,50 +14,70 @@ import streamlit as st
 
 from services import env_bootstrap  # noqa: F401,E402
 from services import sentry_init  # noqa: F401,E402
-from services.health import DEFAULT_API_BASE, system_status
-from services.s3_client import list_recent_objects
-from services.db import ping_database
+from services.auth_session import clear_auth, get_user
+from services.health import DEFAULT_API_BASE, check_api
 
 st.set_page_config(
-    page_title="ResumeAI Backend",
+    page_title="ResumeAI",
     page_icon="R",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-st.title("ResumeAI Backend")
-st.caption("Streamlit operations console · PostgreSQL · AWS S3 · OpenAI")
+st.title("ResumeAI")
+st.caption("Streamlit frontend · AI workflows · ops console")
+
+api = os.getenv("API_BASE_URL", DEFAULT_API_BASE)
+user = get_user()
+api_status = check_api()
 
 with st.sidebar:
-    st.header("Environment")
-    st.code(os.getenv("NODE_ENV", os.getenv("APP_ENV", "development")))
-    st.write(f"API: `{os.getenv('API_BASE_URL', DEFAULT_API_BASE)}`")
-    st.write(f"S3 bucket: `{os.getenv('S3_BUCKET') or '— (optional)'}`")
+    st.header("Session")
+    if user:
+        st.write(f"Signed in as **{user.get('email') or user.get('name') or 'user'}**")
+        if st.button("Sign out"):
+            clear_auth()
+            st.rerun()
+    else:
+        st.write("Not signed in")
+        st.page_link("pages/0_Account.py", label="Account →", icon=":material/person:")
+    st.divider()
+    st.write(f"API: `{api}`")
+    st.write(f"API health: **{api_status['label']}**")
 
-status = system_status()
-cols = st.columns(3)
-cols[0].metric("API", status["api"]["label"])
-cols[1].metric("PostgreSQL", status["database"]["label"])
-cols[2].metric("S3", status["storage"]["label"])
+col1, col2, col3 = st.columns(3)
+col1.metric("API", api_status["label"])
+col2.metric("Account", "Signed in" if user else "Guest")
+col3.metric("Env", os.getenv("APP_ENV", os.getenv("NODE_ENV", "production")))
 
 st.divider()
-st.subheader("Service health")
-st.json(status)
+st.subheader("Frontend")
+st.write("Use the sidebar pages for product workflows.")
 
-db_ok, db_detail = ping_database()
-st.write("**Database ping:**", "OK" if db_ok else "Unavailable", f"— {db_detail}")
+f1, f2, f3 = st.columns(3)
+with f1:
+    st.markdown("### Account")
+    st.write("Register or sign in against the production API.")
+    st.page_link("pages/0_Account.py", label="Open Account", icon=":material/login:")
+with f2:
+    st.markdown("### JD Analyze")
+    st.write("Paste a job description and extract keywords via the API.")
+    st.page_link("pages/1_JD_Analyze.py", label="Open JD Analyze", icon=":material/search:")
+with f3:
+    st.markdown("### Optimize")
+    st.write("Optimize a resume JSON against a job description.")
+    st.page_link("pages/2_Optimize.py", label="Open Optimize", icon=":material/auto_awesome:")
 
-st.subheader("Recent S3 objects")
-if not os.getenv("S3_BUCKET"):
-    st.info("S3 not configured for local use. Set S3_BUCKET (+ AWS credentials) or run MinIO to enable.")
+st.divider()
+st.subheader("Backend")
+st.write("Ops console for API, Postgres, and S3 health checks.")
+st.page_link("pages/3_Backend.py", label="Open Backend console", icon=":material/monitoring:")
+
+if not api_status["ok"]:
+    st.warning(
+        "API is unreachable from this Streamlit app. "
+        "Set `API_BASE_URL` in Streamlit Secrets to "
+        "`https://ai-resume-api-tau.vercel.app/api/v1`."
+    )
 else:
-    try:
-        objects = list_recent_objects(limit=10)
-        if objects:
-            st.dataframe(objects, use_container_width=True)
-        else:
-            st.info("No objects found in bucket.")
-    except Exception as exc:  # noqa: BLE001
-        st.warning(f"S3 listing failed: {exc}")
-
-st.success("Streamlit backend is running. Use the pages in the sidebar for AI workflows.")
+    st.success("Frontend and backend pages are ready. REST API is healthy.")

@@ -10,13 +10,14 @@ import streamlit as st
 # Multipage scripts may not have apps/streamlit on sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from services.health import api_base, api_headers  # noqa: E402
+from services.auth_session import auth_headers  # noqa: E402
+from services.health import api_base  # noqa: E402
 
 st.set_page_config(page_title="JD Analyze · ResumeAI", layout="wide")
 st.title("Job description analysis")
 
 api = api_base()
-headers = api_headers()
+headers = auth_headers()
 
 jd = st.text_area("Paste job description", height=240)
 

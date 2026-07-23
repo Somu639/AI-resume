@@ -4,15 +4,15 @@
 
 | Layer | Technology | Host |
 |-------|------------|------|
-| Frontend | Next.js 15 | **Vercel** (`apps/web`) |
+| Frontend (primary) | Next.js 15 | **Vercel** (`apps/web`) |
+| Frontend + backend UI | **Streamlit** | **Streamlit Community Cloud** (`apps/streamlit`) |
 | REST API | Express | **Vercel** (`apps/api`) — used by web + Streamlit |
-| Backend console | **Streamlit** | **Streamlit Community Cloud** / Docker |
 | Database | **PostgreSQL** | Neon / Supabase / RDS |
 | Storage | **AWS S3** | AWS |
 
-- **Frontend (Vercel):** marketing + dashboard UI  
-- **Backend (Streamlit):** ops console and AI workflow UI  
-- **REST API (Vercel):** shared JSON API both surfaces call  
+- **Frontend (Vercel):** marketing + full dashboard UI  
+- **Streamlit:** product workflows (Account / JD / Optimize) + backend ops console  
+- **REST API (Vercel):** shared JSON API (Streamlit cannot host Express)  
 
 ## Environment variables
 
@@ -69,21 +69,29 @@ cp apps/streamlit/.env.example apps/streamlit/.env
 2. Set production env: `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `DATABASE_URL`, `CLIENT_URL`, `OPENAI_API_KEY`, `TRUST_PROXY=true`.
 3. Redeploy. Health: `https://<api>.vercel.app/api/v1/health`
 
-## Backend → Streamlit Community Cloud
+## Frontend + backend UI → Streamlit Community Cloud
 
-1. Go to [share.streamlit.io](https://share.streamlit.io) → **New app**.
+Streamlit hosts the Python UI only. The Express API stays on Vercel.
+
+1. Go to [share.streamlit.io](https://share.streamlit.io) → **New app**  
+   (or open the deploy link below after pushing `main`).
 2. Repo: `Somu639/AI-resume`, branch `main`.
 3. **Main file path:** `apps/streamlit/app.py`
 4. **App URL** will look like `https://<app>.streamlit.app`
-5. In **Secrets** (or Advanced settings), paste:
+5. In **Secrets**, paste (see also `apps/streamlit/.streamlit/secrets.toml.example`):
 
 ```toml
 API_BASE_URL = "https://ai-resume-api-tau.vercel.app/api/v1"
 DATABASE_URL = "postgresql://..."
 OPENAI_API_KEY = "gsk_..."
+APP_ENV = "production"
 ```
 
-6. Add the Streamlit URL to API `CLIENT_URLS` for CORS.
+6. Optional: add the Streamlit URL to API `CLIENT_URLS` (only needed for browser CORS; Streamlit server→API calls do not need it).
+
+Deploy shortcut (after GitHub push):
+
+https://share.streamlit.io/deploy?repository=Somu639/AI-resume&branch=main&mainModule=apps/streamlit/app.py&appName=resumeai
 
 Local Streamlit:
 

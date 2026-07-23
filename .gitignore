@@ -60,3 +60,5 @@ packages/*/dist/
 
 .vercel
 .env*
+apps/api/.neon
+apps/streamlit/.streamlit/secrets.toml

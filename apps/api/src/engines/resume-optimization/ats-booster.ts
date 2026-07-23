@@ -116,9 +116,35 @@ export function boostResumeForAts(
     }
   }
 
-  // Ensure enough action bullets for formatting score (duplicate-safe pad from existing)
+  // Surface evidenced JD terms into each experience entry so the experience
+  // relevance sub-score reaches its honest ceiling in a single pass. We only
+  // add a term when it is already evidenced within THAT SAME role's own text
+  // (title/company/bullets, alias-aware) but not yet present verbatim — this
+  // never invents work the candidate didn't do at that role.
   const experience = resume.experience.map((jobItem) => {
     const bullets = [...jobItem.bullets];
+    const entryText = [jobItem.title, jobItem.company, ...bullets].join("\n");
+    const bulletsText = bullets.join("\n");
+
+    const evidencedHere: string[] = [];
+    const seenHere = new Set<string>();
+    for (const term of jdTerms) {
+      const key = term.toLowerCase();
+      if (seenHere.has(key)) continue;
+      // Present verbatim already? skip.
+      if (textIncludesTerm(bulletsText, term)) continue;
+      // Only surface if this role's own text evidences it (alias-aware).
+      if (!corpusIncludes(entryText, term)) continue;
+      seenHere.add(key);
+      evidencedHere.push(term);
+    }
+
+    if (evidencedHere.length) {
+      bullets.push(
+        `Key tools & technologies: ${evidencedHere.slice(0, 14).join(", ")}`
+      );
+    }
+
     if (bullets.length === 0 && jobItem.title) {
       bullets.push(
         `Contributed as ${jobItem.title} at ${jobItem.company}`.trim()

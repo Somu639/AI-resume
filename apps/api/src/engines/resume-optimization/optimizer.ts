@@ -23,9 +23,12 @@ import {
 } from "./schema";
 import { resumeJsonToText } from "./serialize";
 
-const TARGET_ATS_SCORE = 99;
-/** Max LLM refine passes; the loop also stops early once the score converges. */
-const MAX_REFINE_PASSES = 4;
+// Cross the ">95" bar directly. The deterministic booster lifts the score in a
+// single pass, so we stop as soon as we're above 95 instead of creeping up a
+// few points per LLM pass.
+const TARGET_ATS_SCORE = 96;
+/** Fallback LLM refine passes if the first strong pass still lands ≤ 95. */
+const MAX_REFINE_PASSES = 3;
 
 function parseModelJson(content: string, label: string): unknown {
   const trimmed = content.trim();

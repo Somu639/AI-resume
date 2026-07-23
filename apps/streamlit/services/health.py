@@ -7,8 +7,9 @@ import requests
 
 from services import env_bootstrap  # noqa: F401
 
-# Matches local apps/api PORT=4002 (Docker Compose overrides API_BASE_URL)
-DEFAULT_API_BASE = "http://localhost:4002/api/v1"
+# Production API on Vercel. Override with API_BASE_URL for local dev
+# (e.g. http://localhost:4002/api/v1) or Docker Compose.
+DEFAULT_API_BASE = "https://ai-resume-api-tau.vercel.app/api/v1"
 
 
 def api_base() -> str:
